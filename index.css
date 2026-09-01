@@ -1,0 +1,20 @@
+label {
+    font-size: 24px;
+    letter-spacing: 0.2px;
+}
+body {
+    background-color: green;
+}
+ul > li {
+    list-style: none;
+}
+input[type="text"] {
+    display: flex;
+}
+#Save-location-btn,
+#Toggle-unit-btn {
+    display: none;
+} /* will be shown once weather is fetched */
+#Fetch-weather-btn {
+    margin-bottom: 10px;
+}
