@@ -1,12 +1,12 @@
 // html element selectors
-const countryInput = document.getElementById("Country");
-const cityInput = document.getElementById("City");
-const weatherDisplay = document.getElementById("Weather-display");
-const locationInputForm = document.getElementById("Location-input");
-const toggleUnitBtn = document.getElementById("Toggle-unit-btn");
-const saveBtn = document.getElementById("Save-location-btn");
+const countryInput = document.getElementById("country");
+const cityInput = document.getElementById("city");
+const weatherDisplay = document.getElementById("weather-display");
+const locationInputForm = document.getElementById("location-input");
+const toggleUnitBtn = document.getElementById("toggle-unit-btn");
+const saveBtn = document.getElementById("save-location-btn");
 const savedLocations = document.getElementById(
-  "Saved-locations-btns-container",
+  "saved-locations-btns-container",
 ); // locations container
 // initial state
 let unitInF; /* false means the tempature will be displayed in °C true means the tempature will be displayed in °F and will be the default value after the first fetch, when empty means no weather data has been fetched. */
@@ -63,7 +63,7 @@ saveBtn.addEventListener("click", (event) => {
     const savedLocation = document.createElement("button");
     savedLocation.style.display = "block";
     savedLocation.id = `${data.name}, ${data.sys.country}`;
-    savedLocation.textContent = `fetch ${data.name}, ${data.sys.country}`;
+    savedLocation.textContent = `Fetch ${data.name}, ${data.sys.country}`;
     const tempCity = data.name; // city used for fetching via clicking saved location button
     const tempCountry = data.sys.country;
     savedLocation.addEventListener("click", (event) => {
