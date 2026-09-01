@@ -1,4 +1,4 @@
-// html element selectors
+// HTML element selectors
 const countryInput = document.getElementById("country");
 const cityInput = document.getElementById("city");
 const weatherDisplay = document.getElementById("weather-display");
@@ -7,14 +7,14 @@ const toggleUnitBtn = document.getElementById("toggle-unit-btn");
 const saveBtn = document.getElementById("save-location-btn");
 const savedLocations = document.getElementById(
   "saved-locations-btns-container",
-); // locations container
-// initial state
-let unitInF; /* false means the tempature will be displayed in °C true means the tempature will be displayed in °F and will be the default value after the first fetch, when empty means no weather data has been fetched. */
+); // Locations container
+// Initial state
+let unitInF; /* False means the tempature will be displayed in °C true means the tempature will be displayed in °F and will be the default value after the first fetch, when empty means no weather data has been fetched. */
 const key = "f604db20a39eb25fb77c35625cd7a41c";
-let data = null; // weather data
-let degrees; // api call returns value in kelvin
+let data = null; // Weather data
+let degrees; // Api call returns value in kelvin
 
-// fetches weather from open weather map api
+// Fetches weather from open weather map api
 function getWeather(city, country) {
   fetch(
     `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=${key}`,
@@ -28,7 +28,7 @@ function getWeather(city, country) {
       data = weather;
     })
     .catch((err) => console.error(err));
-  // makes toggle unit and save location buttons available after inital fetch
+  // Makes toggle unit and save location buttons available after inital fetch
   toggleUnitBtn.style.display = "inline";
   saveBtn.style.display = "inline";
 }
@@ -38,7 +38,7 @@ locationInputForm.addEventListener("submit", (event) => {
   cityInput.value = "";
   countryInput.value = "";
 });
-// displays weather and handles tempature units
+// Displays weather and handles tempature units
 function displayWeather(weather) {
   if (!unitInF) {
     toggleUnitBtn.textContent = "In fahrenheit";
@@ -52,19 +52,19 @@ function displayWeather(weather) {
 }
 toggleUnitBtn.addEventListener("click", (event) => {
   event.preventDefault();
-  unitInF = !unitInF; // flips to opposite unit
+  unitInF = !unitInF; // Flips to opposite unit
   displayWeather(data);
 });
 saveBtn.addEventListener("click", (event) => {
   event.preventDefault();
   const locationID = `${data.name}, ${data.sys.country}`;
   if (!document.getElementById(locationID)) {
-    // checks if location has been added
+    // Checks if location has been added
     const savedLocation = document.createElement("button");
     savedLocation.style.display = "block";
     savedLocation.id = `${data.name}, ${data.sys.country}`;
     savedLocation.textContent = `Fetch ${data.name}, ${data.sys.country}`;
-    const tempCity = data.name; // city used for fetching via clicking saved location button
+    const tempCity = data.name; // City used for fetching via clicking saved location button
     const tempCountry = data.sys.country;
     savedLocation.addEventListener("click", (event) => {
       event.preventDefault();
