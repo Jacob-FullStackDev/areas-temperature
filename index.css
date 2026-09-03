@@ -11,8 +11,7 @@ ul > li {
 input[type="text"] {
   display: flex;
 }
-#Save-location-btn,
-#Toggle-unit-btn {
+.hidden {
   display: none;
 } /* Will be shown once weather is fetched */
 #Fetch-weather-btn {
