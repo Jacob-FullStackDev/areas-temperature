@@ -69,9 +69,11 @@ saveBtn.addEventListener("click", (event) => {
     savedLocationContainerEl.append(savedLocationBtn, removeSavedLocationBtn);
     const cityValue = data.name; // City used for fetching via clicking saved location button
     const countryValue = data.sys.country;
-    savedLocationBtn.addEventListener("click", (event) => {
-      event.preventDefault();
+    savedLocationBtn.addEventListener("click", () => {
       getWeather(cityValue, countryValue);
+    });
+    removeSavedLocationBtn.addEventListener("click", () => {
+      savedLocationContainerEl.remove();
     });
     savedLocations.append(savedLocationContainerEl);
   } else {
