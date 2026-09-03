@@ -12,7 +12,31 @@ const savedLocations = document.getElementById(
 let unitInF; /* False means the tempature will be displayed in °C true means the tempature will be displayed in °F and will be the default value after the first fetch, when empty means no weather data has been fetched. */
 const key = "f604db20a39eb25fb77c35625cd7a41c";
 let data = null; // Weather data
-let degrees; // Api call returns value in kelvin
+let degrees; // API call returns value in kelvin
+let localStorageSupported = true;
+
+function storageAvailable() {
+  try {
+    let storage = window["sessionStorage"];
+    const x = "__storage_test__";
+    storage.setItem(x, x);
+    storage.removeItem(x);
+    return true;
+  } catch (e) {
+    return (
+      e instanceof DOMException &&
+      e.name === "QuotaExceededError" &&
+      storage &&
+      storage.length !== 0
+    );
+  }
+}
+if (!storageAvailable()) {
+  localStorageSupported = false;
+  console.warn(
+    "Local storage is unsupported, saved locations will be cleared after you exit or refresh the page",
+  );
+}
 
 // Fetches weather from open weather map api
 function getWeather(city, country) {
@@ -77,6 +101,6 @@ saveBtn.addEventListener("click", (event) => {
     });
     savedLocations.append(savedLocationContainerEl);
   } else {
-    console.log("Location already added");
+    console.warn("Location already added");
   }
 });
