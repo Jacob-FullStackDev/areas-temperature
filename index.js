@@ -60,17 +60,20 @@ saveBtn.addEventListener("click", (event) => {
   const locationID = `${data.name}, ${data.sys.country}`;
   if (!document.getElementById(locationID)) {
     // Checks if location has been added
-    const savedLocation = document.createElement("button");
-    savedLocation.style.display = "block";
-    savedLocation.id = `${data.name}, ${data.sys.country}`;
-    savedLocation.textContent = `Fetch ${data.name}, ${data.sys.country}`;
-    const tempCity = data.name; // City used for fetching via clicking saved location button
-    const tempCountry = data.sys.country;
-    savedLocation.addEventListener("click", (event) => {
+    const savedLocationContainerEl = document.createElement("div");
+    const savedLocationBtn = document.createElement("button");
+    const removeSavedLocationBtn = document.createElement("button");
+    savedLocationBtn.id = `${data.name}, ${data.sys.country}`;
+    savedLocationBtn.textContent = `Fetch ${data.name}, ${data.sys.country}`;
+    removeSavedLocationBtn.textContent = "Delete location";
+    savedLocationContainerEl.append(savedLocationBtn, removeSavedLocationBtn);
+    const cityValue = data.name; // City used for fetching via clicking saved location button
+    const countryValue = data.sys.country;
+    savedLocationBtn.addEventListener("click", (event) => {
       event.preventDefault();
-      getWeather(tempCity, tempCountry);
+      getWeather(cityValue, countryValue);
     });
-    savedLocations.appendChild(savedLocation);
+    savedLocations.append(savedLocationContainerEl);
   } else {
     console.log("Location already added");
   }
