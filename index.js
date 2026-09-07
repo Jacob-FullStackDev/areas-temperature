@@ -1,11 +1,11 @@
 // HTML element selectors
 const countryInput = document.getElementById("country");
 const cityInput = document.getElementById("city");
-const weatherDisplay = document.getElementById("weather-display");
+const weatherDisplayEl = document.getElementById("weather-display");
 const locationInputForm = document.getElementById("location-input");
 const toggleUnitBtn = document.getElementById("toggle-unit-btn");
 const saveBtn = document.getElementById("save-location-btn");
-const savedLocations = document.getElementById(
+const savedLocationsEl = document.getElementById(
   "saved-locations-btns-container",
 ); // Locations container
 // Initial state
@@ -14,6 +14,9 @@ const key = "f604db20a39eb25fb77c35625cd7a41c";
 let data = null; // Weather data
 let degrees; // API call returns value in kelvin
 let localStorageSupported = true;
+let locationID = 0;
+let currentCity = "";
+let currentCountry = "";
 
 function storageAvailable() {
   try {
@@ -37,6 +40,53 @@ if (!storageAvailable()) {
     "Local storage is unsupported, saved locations will be cleared after you exit or refresh the page",
   );
 }
+function utilizeFetchBtn(
+  locationEl,
+  savedLocationBtn,
+  removeSavedLocationBtn,
+  city,
+  country,
+  state = undefined,
+) {
+  const savedLocationObj = {
+    city: city,
+    country: country,
+  };
+  console.log(savedLocationObj);
+  savedLocationsEl.append(locationEl);
+  locationID++;
+  console.log(locationID);
+  localStorage.setItem(locationID, JSON.stringify(savedLocationObj));
+  savedLocationBtn.addEventListener("click", () => {
+    getWeather(city, country);
+  });
+  removeSavedLocationBtn.addEventListener("click", () => {
+    savedLocationContainerEl.remove();
+  });
+}
+
+function createFetchBtn(city, country, state = undefined) {
+  const savedLocationContainerEl = document.createElement("div");
+  const savedLocationBtn = document.createElement("button");
+  const removeSavedLocationBtn = document.createElement("button");
+  savedLocationBtn.id = `${city}, ${country}`;
+  savedLocationBtn.textContent = `Fetch ${city}, ${country}`;
+  removeSavedLocationBtn.textContent = "Delete location";
+  savedLocationContainerEl.append(savedLocationBtn, removeSavedLocationBtn);
+  utilizeFetchBtn(
+    savedLocationContainerEl,
+    savedLocationBtn,
+    removeSavedLocationBtn,
+    city,
+    country,
+  );
+}
+
+if (localStorage.length > 0) {
+  for (let i = 1; i <= localStorage.length; i++) {
+    let city = JSON.parse(localStorage[i]).city;
+  }
+}
 
 // Fetches weather from open weather map api
 function getWeather(city, country) {
@@ -53,12 +103,14 @@ function getWeather(city, country) {
     })
     .catch((err) => console.error(err));
   // Makes toggle unit and save location buttons available after inital fetch
-  toggleUnitBtn.style.display = "inline";
-  saveBtn.style.display = "inline";
+  toggleUnitBtn.classList.remove("hidden");
+  saveBtn.classList.remove("hidden");
 }
 locationInputForm.addEventListener("submit", (event) => {
   event.preventDefault();
   getWeather(cityInput.value, countryInput.value);
+  currentCity = cityInput.value;
+  currentCountry = countryInput.value;
   cityInput.value = "";
   countryInput.value = "";
 });
@@ -67,39 +119,24 @@ function displayWeather(weather) {
   if (!unitInF) {
     toggleUnitBtn.textContent = "In fahrenheit";
     degrees = Math.round(((weather.main.temp - 273.15) * 9) / 5 + 32);
-    weatherDisplay.textContent = `It is currently ${degrees} °F in ${weather.name}, ${weather.sys.country}`;
+    weatherDisplayEl.textContent = `It is currently ${degrees} °F in ${weather.name}, ${weather.sys.country}`;
   } else if (unitInF === true) {
     toggleUnitBtn.textContent = "In celsius";
     degrees = Math.round(weather.main.temp - 273.15);
-    weatherDisplay.textContent = `It is currently ${degrees} °C in ${weather.name}, ${weather.sys.country}`;
+    weatherDisplayEl.textContent = `It is currently ${degrees} °C in ${weather.name}, ${weather.sys.country}`;
   }
 }
-toggleUnitBtn.addEventListener("click", (event) => {
-  event.preventDefault();
+
+toggleUnitBtn.addEventListener("click", () => {
   unitInF = !unitInF; // Flips to opposite unit
   displayWeather(data);
 });
-saveBtn.addEventListener("click", (event) => {
-  event.preventDefault();
-  const locationID = `${data.name}, ${data.sys.country}`;
+
+saveBtn.addEventListener("click", () => {
   if (!document.getElementById(locationID)) {
     // Checks if location has been added
-    const savedLocationContainerEl = document.createElement("div");
-    const savedLocationBtn = document.createElement("button");
-    const removeSavedLocationBtn = document.createElement("button");
-    savedLocationBtn.id = `${data.name}, ${data.sys.country}`;
-    savedLocationBtn.textContent = `Fetch ${data.name}, ${data.sys.country}`;
-    removeSavedLocationBtn.textContent = "Delete location";
-    savedLocationContainerEl.append(savedLocationBtn, removeSavedLocationBtn);
-    const cityValue = data.name; // City used for fetching via clicking saved location button
-    const countryValue = data.sys.country;
-    savedLocationBtn.addEventListener("click", () => {
-      getWeather(cityValue, countryValue);
-    });
-    removeSavedLocationBtn.addEventListener("click", () => {
-      savedLocationContainerEl.remove();
-    });
-    savedLocations.append(savedLocationContainerEl);
+    console.log(currentCity, currentCountry);
+    createFetchBtn(currentCity, currentCountry);
   } else {
     console.warn("Location already added");
   }
