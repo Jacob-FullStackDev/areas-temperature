@@ -44,7 +44,6 @@ function utilizeFetchBtn(
   locationEl,
   savedLocationBtn,
   removeSavedLocationBtn,
-  savedLocationContainerEl,
   city,
   country,
   state = undefined,
@@ -53,15 +52,15 @@ function utilizeFetchBtn(
     city: city,
     country: country,
   };
-  console.log(savedLocationObj);
   savedLocationsEl.append(locationEl);
   locationID++;
-  console.log(locationID);
   localStorage.setItem(locationID, JSON.stringify(savedLocationObj));
   savedLocationBtn.addEventListener("click", () => {
     getWeather(city, country);
   });
-  removeSavedLocationBtn.addEventListener("click", () => {});
+  removeSavedLocationBtn.addEventListener("click", () => {
+    locationEl.remove();
+  });
 }
 
 function createFetchBtn(city, country, state = undefined) {
