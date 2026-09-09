@@ -81,13 +81,13 @@ function createFetchBtn(city, country, state = undefined) {
   );
 }
 
-// if (localStorage.length > 0) {
-//   for (let i = 1; i <= localStorage.length; i++) {
-//     let city = JSON.parse(localStorage[i]).city;
-//     let country = JSON.parse(localStorage[i]).country;
-//     createFetchBtn(city, country);
-//   }
-// }
+if (localStorage.length > 0) {
+  for (let i = 1; i <= localStorage.length; i++) {
+    let city = JSON.parse(localStorage[i]).city;
+    let country = JSON.parse(localStorage[i]).country;
+    createFetchBtn(city, country);
+  }
+}
 
 // Fetches weather from open weather map api
 function getWeather(city, country) {
