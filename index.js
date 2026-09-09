@@ -8,7 +8,7 @@ const saveBtn = document.getElementById("save-location-btn");
 const savedLocationsEl = document.getElementById(
   "saved-locations-btns-container",
 ); // Locations container
-// Initial state
+/* INITIAL STATE */
 let unitInF; /* False means the tempature will be displayed in °C true means the tempature will be displayed in °F and will be the default value after the first fetch, when empty means no weather data has been fetched. */
 const key = "f604db20a39eb25fb77c35625cd7a41c";
 let data = null; // Weather data
@@ -44,6 +44,7 @@ function utilizeFetchBtn(
   locationEl,
   savedLocationBtn,
   removeSavedLocationBtn,
+  savedLocationContainerEl,
   city,
   country,
   state = undefined,
@@ -60,9 +61,7 @@ function utilizeFetchBtn(
   savedLocationBtn.addEventListener("click", () => {
     getWeather(city, country);
   });
-  removeSavedLocationBtn.addEventListener("click", () => {
-    savedLocationContainerEl.remove();
-  });
+  removeSavedLocationBtn.addEventListener("click", () => {});
 }
 
 function createFetchBtn(city, country, state = undefined) {
@@ -77,16 +76,19 @@ function createFetchBtn(city, country, state = undefined) {
     savedLocationContainerEl,
     savedLocationBtn,
     removeSavedLocationBtn,
+    savedLocationContainerEl,
     city,
     country,
   );
 }
 
-if (localStorage.length > 0) {
-  for (let i = 1; i <= localStorage.length; i++) {
-    let city = JSON.parse(localStorage[i]).city;
-  }
-}
+// if (localStorage.length > 0) {
+//   for (let i = 1; i <= localStorage.length; i++) {
+//     let city = JSON.parse(localStorage[i]).city;
+//     let country = JSON.parse(localStorage[i]).country;
+//     createFetchBtn(city, country);
+//   }
+// }
 
 // Fetches weather from open weather map api
 function getWeather(city, country) {
