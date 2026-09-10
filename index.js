@@ -134,9 +134,12 @@ function getWeather(city, country, state = "") {
 }
 locationInputForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  getWeather(cityInputEl.value, countryInputEl.value);
   currentCity = cityInputEl.value;
   currentCountry = countryInputEl.value;
+  if (state) {
+    currentState = stateInputEl.value;
+  }
+  getWeather(currentCity, currentCountry, currentState);
   cityInputEl.value = "";
   countryInputEl.value = "";
 });
