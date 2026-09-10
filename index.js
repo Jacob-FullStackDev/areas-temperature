@@ -1,6 +1,7 @@
 // HTML element selectors
-const countryInput = document.getElementById("country");
-const cityInput = document.getElementById("city");
+const countryInputEl = document.getElementById("country");
+const cityInputEl = document.getElementById("city");
+const stateInputEl = document.getElementById("state");
 const weatherDisplayEl = document.getElementById("weather-display");
 const locationInputForm = document.getElementById("location-input");
 const toggleUnitBtn = document.getElementById("toggle-unit-btn");
@@ -19,6 +20,7 @@ let localStorageSupported = true;
 let locationID = 0;
 let currentCity = "";
 let currentCountry = "";
+let currentState = "";
 
 function storageAvailable() {
   try {
@@ -99,9 +101,9 @@ if (localStorage.length > 0) {
 }
 
 // Fetches weather from open weather map api
-function getWeather(city, country) {
+function getWeather(city, country, state = "") {
   fetch(
-    `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=${key}`,
+    `https://api.openweathermap.org/data/2.5/weather?q=${city},${state},${country}&appid=${key}`,
     { mode: `cors` },
   )
     .then((response) => {
@@ -112,17 +114,31 @@ function getWeather(city, country) {
       data = weather;
     })
     .catch((err) => console.error(err));
+  if (state) {
+    fetch(
+      `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=${key}`,
+    )
+      .then((res) => {
+        return res.json();
+      })
+      .then((weather) => {
+        console.log(weather, weather.coord);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
   // Makes toggle unit and save location buttons available after inital fetch
   toggleUnitBtn.classList.remove("hidden");
   saveBtn.classList.remove("hidden");
 }
 locationInputForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  getWeather(cityInput.value, countryInput.value);
-  currentCity = cityInput.value;
-  currentCountry = countryInput.value;
-  cityInput.value = "";
-  countryInput.value = "";
+  getWeather(cityInputEl.value, countryInputEl.value);
+  currentCity = cityInputEl.value;
+  currentCountry = countryInputEl.value;
+  cityInputEl.value = "";
+  countryInputEl.value = "";
 });
 // Displays weather and handles tempature units
 function displayWeather(weather) {
