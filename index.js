@@ -112,6 +112,7 @@ locationInputForm.addEventListener("submit", (event) => {
   getWeather(cityInput.value, countryInput.value);
   currentCity = cityInput.value;
   currentCountry = countryInput.value;
+  console.log(currentCity, currentCountry);
   cityInput.value = "";
   countryInput.value = "";
 });
@@ -134,9 +135,8 @@ toggleUnitBtn.addEventListener("click", () => {
 });
 
 saveBtn.addEventListener("click", () => {
-  if (!document.getElementById(locationID)) {
+  if (!document.getElementById(`${currentCity}, ${currentCountry}`)) {
     // Checks if location has been added
-    console.log(currentCity, currentCountry);
     createFetchBtn(currentCity, currentCountry);
   } else {
     console.warn("Location already added");
