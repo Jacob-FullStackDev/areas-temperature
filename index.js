@@ -8,7 +8,9 @@ const saveBtn = document.getElementById("save-location-btn");
 const savedLocationsEl = document.getElementById(
   "saved-locations-btns-container",
 ); // Locations container
+
 /* INITIAL STATE */
+
 let unitInF; /* False means the tempature will be displayed in °C true means the tempature will be displayed in °F and will be the default value after the first fetch, when empty means no weather data has been fetched. */
 const key = "f604db20a39eb25fb77c35625cd7a41c";
 let data = null; // Weather data
@@ -40,6 +42,7 @@ if (!storageAvailable()) {
     "Local storage is unsupported, saved locations will be cleared after you exit or refresh the page",
   );
 }
+
 function utilizeFetchBtn(
   locationEl,
   savedLocationBtn,
@@ -48,12 +51,18 @@ function utilizeFetchBtn(
   country,
   state = undefined,
 ) {
+  console.log(city, country);
   const savedLocationObj = {
+    locationEl: locationEl,
+    savedLocationBtn: savedLocationBtn,
+    removeSavedLocationBtn: removeSavedLocationBtn,
     city: city,
     country: country,
   };
   savedLocationsEl.append(locationEl);
   locationID++;
+  const stringify = JSON.stringify(savedLocationObj);
+  console.log(savedLocationObj, stringify, JSON.parse(stringify));
   localStorage.setItem(locationID, JSON.stringify(savedLocationObj));
   savedLocationBtn.addEventListener("click", () => {
     getWeather(city, country);
@@ -72,7 +81,6 @@ function createFetchBtn(city, country, state = undefined) {
   removeSavedLocationBtn.textContent = "Delete location";
   savedLocationContainerEl.append(savedLocationBtn, removeSavedLocationBtn);
   utilizeFetchBtn(
-    savedLocationContainerEl,
     savedLocationBtn,
     removeSavedLocationBtn,
     savedLocationContainerEl,
@@ -83,9 +91,10 @@ function createFetchBtn(city, country, state = undefined) {
 
 if (localStorage.length > 0) {
   for (let i = 1; i <= localStorage.length; i++) {
-    let city = JSON.parse(localStorage[i]).city;
-    let country = JSON.parse(localStorage[i]).country;
-    createFetchBtn(city, country);
+    const savedLocation = JSON.parse(localStorage.getItem(i));
+    const savedLocationCity = savedLocation.city;
+    const savedLocationCountry = savedLocation.country;
+    createFetchBtn(savedLocationCity, savedLocationCountry);
   }
 }
 
@@ -122,7 +131,7 @@ function displayWeather(weather) {
     toggleUnitBtn.textContent = "In fahrenheit";
     degrees = Math.round(((weather.main.temp - 273.15) * 9) / 5 + 32);
     weatherDisplayEl.textContent = `It is currently ${degrees} °F in ${weather.name}, ${weather.sys.country}`;
-  } else if (unitInF === true) {
+  } else if (unitInF) {
     toggleUnitBtn.textContent = "In celsius";
     degrees = Math.round(weather.main.temp - 273.15);
     weatherDisplayEl.textContent = `It is currently ${degrees} °C in ${weather.name}, ${weather.sys.country}`;
