@@ -51,18 +51,12 @@ function utilizeFetchBtn(
   country,
   state = undefined,
 ) {
-  console.log(city, country);
   const savedLocationObj = {
-    locationEl: locationEl,
-    savedLocationBtn: savedLocationBtn,
-    removeSavedLocationBtn: removeSavedLocationBtn,
     city: city,
     country: country,
   };
   savedLocationsEl.append(locationEl);
   locationID++;
-  const stringify = JSON.stringify(savedLocationObj);
-  console.log(savedLocationObj, stringify, JSON.parse(stringify));
   localStorage.setItem(locationID, JSON.stringify(savedLocationObj));
   savedLocationBtn.addEventListener("click", () => {
     getWeather(city, country);
@@ -80,10 +74,11 @@ function createFetchBtn(city, country, state = undefined) {
   savedLocationBtn.textContent = `Fetch ${city}, ${country}`;
   removeSavedLocationBtn.textContent = "Delete location";
   savedLocationContainerEl.append(savedLocationBtn, removeSavedLocationBtn);
+  savedLocationsEl.append(savedLocationContainerEl);
   utilizeFetchBtn(
+    savedLocationContainerEl,
     savedLocationBtn,
     removeSavedLocationBtn,
-    savedLocationContainerEl,
     city,
     country,
   );
