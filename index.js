@@ -116,7 +116,6 @@ locationInputForm.addEventListener("submit", (event) => {
   getWeather(cityInput.value, countryInput.value);
   currentCity = cityInput.value;
   currentCountry = countryInput.value;
-  console.log(currentCity, currentCountry);
   cityInput.value = "";
   countryInput.value = "";
 });
