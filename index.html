@@ -9,8 +9,18 @@
 </head>
 <div id="main-wrapper">
   <form id="location-input">
-  <label for="city">Input city</label><input type="text" name="city" id="city" required />
-  <label for="country">Input country code first 2 letters</label><input type="text" name="country" id="country" required />
+  <div>
+  <label for="city">Input city</label>
+  <input type="text" name="city" id="city" required />
+  </div>
+  <div>
+  <label for="country">Input country</label>
+  <input type="text" name="country" id="country" required />
+  </div>
+  <div>
+  <label for="state">Input state</label>
+  <input type="text" name="state" id="state" />
+  </div>
   <button id="fetch-weather-btn" name="fetch-weather-btn" type="submit">Fetch weather</button>
   </form>
   <section id="weather-container">
