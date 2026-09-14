@@ -14,7 +14,7 @@ const savedLocationsEl = document.getElementById(
 
 let unitInF; /* False means the tempature will be displayed in °C true means the tempature will be displayed in °F and will be the default value after the first fetch, when empty means no weather data has been fetched. */
 const key = "f604db20a39eb25fb77c35625cd7a41c";
-let data = null; // Weather data
+let weatherData = null;
 let degrees; // API call returns value in kelvin
 let localStorageSupported = true;
 let locationID = 0;
@@ -109,28 +109,29 @@ function getWeather(city, country, state = "") {
     .then((response) => {
       return response.json();
     })
-    .then((weather) => {
-      displayWeather(weather);
-      data = weather;
+    .then((data) => {
+      weatherData = data;
+      displayWeather(weatherData);
     })
     .catch((err) => console.error(err));
   if (state) {
+    // Checks if there is not a city present in that state
     fetch(
       `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=${key}`,
     )
       .then((res) => {
         return res.json();
       })
-      .then((weather) => {
-        console.log(weather, weather.coord);
+      .then((location) => {
+        console.log(location);
       })
       .catch((err) => {
         console.error(err);
       });
+    // Makes toggle unit and save location buttons available after inital fetch
+    toggleUnitBtn.classList.remove("hidden");
+    saveBtn.classList.remove("hidden");
   }
-  // Makes toggle unit and save location buttons available after inital fetch
-  toggleUnitBtn.classList.remove("hidden");
-  saveBtn.classList.remove("hidden");
 }
 locationInputForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -142,6 +143,7 @@ locationInputForm.addEventListener("submit", (event) => {
   getWeather(currentCity, currentCountry, currentState);
   cityInputEl.value = "";
   countryInputEl.value = "";
+  stateInputEl.value = "";
 });
 // Displays weather and handles tempature units
 function displayWeather(weather) {
@@ -158,7 +160,7 @@ function displayWeather(weather) {
 
 toggleUnitBtn.addEventListener("click", () => {
   unitInF = !unitInF; // Flips to opposite unit
-  displayWeather(data);
+  displayWeather(weatherData);
 });
 
 saveBtn.addEventListener("click", () => {
