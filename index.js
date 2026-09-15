@@ -124,14 +124,13 @@ async function getWeather(city, country, state = "") {
       })
       .then((location) => {
         if (
-          (location[0].coord.lat <= location[0].coord.lat + 0.1 ||
-            location[0].coord.lat >= location[0].coord.lat - 0.1) &&
-          (location[0].coord.lon <= location[0].coord.lon + 0.1 ||
-            location[0].coord.lon >= location[0].coord.lon - 0.1)
+          (location[0].lat <= weatherData.lat + 0.1 ||
+            location[0].lat >= weatherData.lat - 0.1) &&
+          (location[0].lon <= weatherData.lon + 0.1 ||
+            location[0].lon >= weatherData.lon - 0.1)
         ) {
-          // city exists in state
         } else {
-          // city doesn't exist in state
+          // no city matching name in state
           console.warn(
             `There is no ${location[0].city} within ${location[0].state}, displaying results for the largest city named ${location[0].city} within ${location[0].country} instead.`,
           );
