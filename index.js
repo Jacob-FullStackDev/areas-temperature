@@ -101,8 +101,8 @@ if (localStorage.length > 0) {
 }
 
 // Fetches weather from open weather map api
-function getWeather(city, country, state = "") {
-  fetch(
+async function getWeather(city, country, state = "") {
+  await fetch(
     `https://api.openweathermap.org/data/2.5/weather?q=${city},${state},${country}&appid=${key}`,
     { mode: `cors` },
   )
@@ -117,21 +117,33 @@ function getWeather(city, country, state = "") {
   if (state) {
     // Checks if there is not a city present in that state
     fetch(
-      `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=${key}`,
+      `http://api.openweathermap.org/geo/1.0/reverse?lat=${weatherData.coord.lat}&lon=${weatherData.coord.lon}&appid=${key}`,
     )
       .then((res) => {
         return res.json();
       })
       .then((location) => {
-        console.log(location);
+        if (
+          (location[0].coord.lat <= location[0].coord.lat + 0.1 ||
+            location[0].coord.lat >= location[0].coord.lat - 0.1) &&
+          (location[0].coord.lon <= location[0].coord.lon + 0.1 ||
+            location[0].coord.lon >= location[0].coord.lon - 0.1)
+        ) {
+          // city exists in state
+        } else {
+          // city doesn't exist in state
+          console.warn(
+            `There is no ${location[0].city} within ${location[0].state}, displaying results for the largest city named ${location[0].city} within ${location[0].country} instead.`,
+          );
+        }
       })
       .catch((err) => {
         console.error(err);
       });
-    // Makes toggle unit and save location buttons available after inital fetch
-    toggleUnitBtn.classList.remove("hidden");
-    saveBtn.classList.remove("hidden");
   }
+  // Makes toggle unit and save location buttons available after inital fetch
+  toggleUnitBtn.classList.remove("hidden");
+  saveBtn.classList.remove("hidden");
 }
 locationInputForm.addEventListener("submit", (event) => {
   event.preventDefault();
