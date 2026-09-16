@@ -17,6 +17,7 @@ const key = "f604db20a39eb25fb77c35625cd7a41c";
 let weatherData = null;
 let degrees; // API call returns value in kelvin
 let localStorageSupported = true;
+let cityExistsWithinState;
 let locationID = 0;
 let currentCity = "";
 let currentCountry = "";
@@ -51,11 +52,12 @@ function utilizeFetchBtn(
   removeSavedLocationBtn,
   city,
   country,
-  state = undefined,
+  state = "",
 ) {
   const savedLocationObj = {
     city: city,
     country: country,
+    state: state,
   };
   savedLocationsEl.append(locationEl);
   locationID++;
@@ -65,7 +67,7 @@ function utilizeFetchBtn(
     JSON.stringify(savedLocationObj),
   );
   savedLocationBtn.addEventListener("click", () => {
-    getWeather(city, country);
+    getWeather(city, country, state);
   });
   removeSavedLocationBtn.addEventListener("click", () => {
     localStorage.removeItem(locationEl.id);
@@ -73,12 +75,12 @@ function utilizeFetchBtn(
   });
 }
 
-function createFetchBtn(city, country, state = undefined) {
+function createFetchBtn(city, country, state = "") {
   const savedLocationContainerEl = document.createElement("div");
   const savedLocationBtn = document.createElement("button");
   const removeSavedLocationBtn = document.createElement("button");
-  savedLocationBtn.id = `${city}, ${country}`;
-  savedLocationBtn.textContent = `Fetch ${city}, ${country}`;
+  savedLocationBtn.id = `${city}, ${cityExistsWithinState ? `${state},` : ""} ${country}`;
+  savedLocationBtn.textContent = `Fetch ${city}, ${cityExistsWithinState ? `${state},` : ""} ${country}`;
   removeSavedLocationBtn.textContent = "Delete location";
   savedLocationContainerEl.append(savedLocationBtn, removeSavedLocationBtn);
   savedLocationsEl.append(savedLocationContainerEl);
@@ -88,6 +90,7 @@ function createFetchBtn(city, country, state = undefined) {
     removeSavedLocationBtn,
     city,
     country,
+    state,
   );
 }
 
@@ -96,12 +99,33 @@ if (localStorage.length > 0) {
     const savedLocation = JSON.parse(localStorage.getItem(`location-${i}`));
     const savedLocationCity = savedLocation.city;
     const savedLocationCountry = savedLocation.country;
-    createFetchBtn(savedLocationCity, savedLocationCountry);
+    const savedLocationState = savedLocation.state;
+    createFetchBtn(savedLocationCity, savedLocationCountry, savedLocationState);
   }
 }
 
 // Fetches weather from open weather map api
 async function getWeather(city, country, state = "") {
+  if (state) {
+    // Checks if there is not a city present in that state
+    await fetch(
+      `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=${key}`,
+    )
+      .then((res) => {
+        return res.json();
+      })
+      .then((location) => {
+        if (!location[0]) {
+          // no city matching name in state
+          cityExistsWithinState = false;
+        } else {
+          cityExistsWithinState = true;
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
   await fetch(
     `https://api.openweathermap.org/data/2.5/weather?q=${city},${state},${country}&appid=${key}`,
     { mode: `cors` },
@@ -114,43 +138,20 @@ async function getWeather(city, country, state = "") {
       displayWeather(weatherData);
     })
     .catch((err) => console.error(err));
-  if (state) {
-    // Checks if there is not a city present in that state
-    fetch(
-      `http://api.openweathermap.org/geo/1.0/reverse?lat=${weatherData.coord.lat}&lon=${weatherData.coord.lon}&appid=${key}`,
-    )
-      .then((res) => {
-        return res.json();
-      })
-      .then((location) => {
-        if (
-          (location[0].lat <= weatherData.lat + 0.1 ||
-            location[0].lat >= weatherData.lat - 0.1) &&
-          (location[0].lon <= weatherData.lon + 0.1 ||
-            location[0].lon >= weatherData.lon - 0.1)
-        ) {
-        } else {
-          // no city matching name in state
-          console.warn(
-            `There is no ${location[0].city} within ${location[0].state}, displaying results for the largest city named ${location[0].city} within ${location[0].country} instead.`,
-          );
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  }
   // Makes toggle unit and save location buttons available after inital fetch
   toggleUnitBtn.classList.remove("hidden");
   saveBtn.classList.remove("hidden");
+  if (!cityExistsWithinState) {
+    console.warn(
+      `There is no ${city} within ${state}, displaying results for the largest city named ${city} within the ${country} instead.`,
+    );
+  }
 }
 locationInputForm.addEventListener("submit", (event) => {
   event.preventDefault();
   currentCity = cityInputEl.value;
   currentCountry = countryInputEl.value;
-  if (state) {
-    currentState = stateInputEl.value;
-  }
+  currentState = stateInputEl.value;
   getWeather(currentCity, currentCountry, currentState);
   cityInputEl.value = "";
   countryInputEl.value = "";
@@ -175,9 +176,13 @@ toggleUnitBtn.addEventListener("click", () => {
 });
 
 saveBtn.addEventListener("click", () => {
-  if (!document.getElementById(`${currentCity}, ${currentCountry}`)) {
+  if (
+    !document.getElementById(
+      `${currentCity}, ${cityExistsWithinState ? `${state},` : ""} ${currentCountry}`,
+    )
+  ) {
     // Checks if location has been added
-    createFetchBtn(currentCity, currentCountry);
+    createFetchBtn(currentCity, currentCountry, currentState);
   } else {
     console.warn("Location already added");
   }
