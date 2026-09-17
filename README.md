@@ -23,10 +23,10 @@
 
 **Usage Instructions**
 
-1. Or visit the live version of the app at [MyCitiesWeather](https://jacobluber2.github.io/MyCitiesWeather/)
+1. Or visit the live version of the app at [Areas Temperature](https://jacob-fullstackdev.github.io/areas-temperature/)
 2. Alternatively, Clone the repository using the following command:
    ```bash
-   git clone https://github.com/JacobLuber2/MyCitiesWeather.git
+   git clone git@github.com:Jacob-FullStackDev/areas-temperature.git
    ```
 
 - Video demonstration is a W.I.P
