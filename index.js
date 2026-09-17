@@ -62,19 +62,24 @@ function utilizeFetchBtn(
   savedLocationsEl.append(locationEl);
   locationID++;
   locationEl.id = `location-${locationID}`;
-  localStorage.setItem(
-    `location-${locationID}`,
-    JSON.stringify(savedLocationObj),
-  );
+  localStorage.setItem(locationID, JSON.stringify(savedLocationObj));
   savedLocationBtn.addEventListener("click", () => {
     getWeather(city, country, true, state);
   });
   removeSavedLocationBtn.addEventListener("click", () => {
-    localStorage.removeItem(locationEl.id);
     locationEl.remove();
+    const removedElId = Number(locationEl.id.slice(9));
+    localStorage.removeItem(locationID);
+    if (localStorage.length > 0) {
+      Object.keys(localStorage).forEach((item) => {
+        if (Number(item) > removedElId) {
+          localStorage.setItem(item - 1, localStorage.getItem(item));
+          localStorage.removeItem(item);
+        }
+      });
+    }
   });
 }
-
 function createFetchBtn(city, country, state = "") {
   const savedLocationContainerEl = document.createElement("div");
   const savedLocationBtn = document.createElement("button");
@@ -96,7 +101,7 @@ function createFetchBtn(city, country, state = "") {
 
 if (localStorage.length > 0) {
   for (let i = 1; i <= localStorage.length; i++) {
-    const savedLocation = JSON.parse(localStorage.getItem(`location-${i}`));
+    const savedLocation = JSON.parse(localStorage.getItem(i));
     const savedLocationCity = savedLocation.city;
     const savedLocationCountry = savedLocation.country;
     const savedLocationState = savedLocation.state;
@@ -109,7 +114,7 @@ async function getWeather(
   city,
   country,
   calledViaSavedLocationBtn,
-  state = "",
+  state = undefined,
 ) {
   if (state) {
     // Checks if there is not a city present in that state
@@ -152,6 +157,7 @@ async function getWeather(
     );
   }
 }
+
 locationInputForm.addEventListener("submit", (event) => {
   event.preventDefault();
   currentCity = cityInputEl.value;
@@ -181,9 +187,10 @@ toggleUnitBtn.addEventListener("click", () => {
 });
 
 saveBtn.addEventListener("click", () => {
+  console.log(cityExistsWithinState, state);
   if (
     !document.getElementById(
-      `${currentCity}, ${cityExistsWithinState ? `${state},` : ""} ${currentCountry}`,
+      `${currentCity},${cityExistsWithinState ? `${state},` : ""}${currentCountry}`,
     )
   ) {
     // Checks if location has been added
