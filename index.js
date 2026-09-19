@@ -71,9 +71,11 @@ function utilizeFetchBtn(
     const removedElId = Number(locationEl.id.slice(9));
     localStorage.removeItem(locationID);
     if (localStorage.length > 0) {
-      Object.keys(localStorage).forEach((item) => {
-        if (Number(item) > removedElId) {
-          localStorage.setItem(item - 1, localStorage.getItem(item));
+      Object.keys(localStorage).forEach((id) => {
+        console.log(id);
+        if (Number(id) > removedElId) {
+          console.log(id - 1);
+          localStorage.setItem(id - 1, localStorage.getItem(id));
           localStorage.removeItem(item);
         }
       });
@@ -117,9 +119,9 @@ async function getWeather(
   state = undefined,
 ) {
   if (state) {
-    // Checks if there is not a city present in that state
+    console.log(state);
     await fetch(
-      `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=${key}`,
+      `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state ? `${state},` : ""}${country}&appid=${key}`,
     )
       .then((res) => {
         return res.json();
@@ -136,8 +138,11 @@ async function getWeather(
         console.error(err);
       });
   }
+  console.log(
+    `https://api.openweathermap.org/data/2.5/weather?q=${city},${state ? `${state},` : ""}${country}&appid=${key}`,
+  );
   await fetch(
-    `https://api.openweathermap.org/data/2.5/weather?q=${city},${state},${country}&appid=${key}`,
+    `https://api.openweathermap.org/data/2.5/weather?q=${city},${state ? `${state},` : ""}${country}&appid=${key}`,
     { mode: `cors` },
   )
     .then((response) => {
@@ -163,7 +168,13 @@ locationInputForm.addEventListener("submit", (event) => {
   currentCity = cityInputEl.value;
   currentCountry = countryInputEl.value;
   currentState = stateInputEl.value;
-  getWeather(currentCity, currentCountry, false, currentState);
+  console.log(Boolean(currentState));
+  getWeather(
+    currentCity,
+    currentCountry,
+    false,
+    currentState ? currentState : undefined,
+  );
   cityInputEl.value = "";
   countryInputEl.value = "";
   stateInputEl.value = "";
@@ -187,14 +198,17 @@ toggleUnitBtn.addEventListener("click", () => {
 });
 
 saveBtn.addEventListener("click", () => {
-  console.log(cityExistsWithinState, state);
+  // Checks if location has been added
   if (
     !document.getElementById(
       `${currentCity},${cityExistsWithinState ? `${state},` : ""}${currentCountry}`,
     )
   ) {
-    // Checks if location has been added
-    createFetchBtn(currentCity, currentCountry, currentState);
+    createFetchBtn(
+      currentCity,
+      currentCountry,
+      currentState ? currentState : "",
+    );
   } else {
     console.warn("Location already added");
   }
