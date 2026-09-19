@@ -17,7 +17,6 @@ const key = "f604db20a39eb25fb77c35625cd7a41c";
 let weatherData = null;
 let degrees; // API call returns value in kelvin
 let localStorageSupported = true;
-let locationID = 0;
 let cityExistsWithinState;
 let currentCity = "";
 let currentCountry = "";
@@ -60,26 +59,14 @@ function utilizeFetchBtn(
     state: state,
   };
   savedLocationsEl.append(locationEl);
-  locationID++;
-  locationEl.id = `location-${locationID}`;
-  localStorage.setItem(locationID, JSON.stringify(savedLocationObj));
+  let localStorageKey = crypto.randomUUID();
+  localStorage.setItem(localStorageKey, JSON.stringify(savedLocationObj));
   savedLocationBtn.addEventListener("click", () => {
     getWeather(city, country, true, state);
   });
   removeSavedLocationBtn.addEventListener("click", () => {
     locationEl.remove();
-    const removedElId = Number(locationEl.id.slice(9));
-    localStorage.removeItem(locationID);
-    if (localStorage.length > 0) {
-      Object.keys(localStorage).forEach((id) => {
-        console.log(id);
-        if (Number(id) > removedElId) {
-          console.log(id - 1);
-          localStorage.setItem(id - 1, localStorage.getItem(id));
-          localStorage.removeItem(item);
-        }
-      });
-    }
+    localStorage.removeItem(localStorageKey);
   });
 }
 function createFetchBtn(city, country, state = "") {
@@ -102,8 +89,9 @@ function createFetchBtn(city, country, state = "") {
 }
 
 if (localStorage.length > 0) {
-  for (let i = 1; i <= localStorage.length; i++) {
-    const savedLocation = JSON.parse(localStorage.getItem(i));
+  for (let key of Object.keys(localStorage)) {
+    console.log(key);
+    const savedLocation = JSON.parse(localStorage.getItem(key));
     const savedLocationCity = savedLocation.city;
     const savedLocationCountry = savedLocation.country;
     const savedLocationState = savedLocation.state;
