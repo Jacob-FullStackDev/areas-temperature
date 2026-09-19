@@ -17,8 +17,8 @@ const key = "f604db20a39eb25fb77c35625cd7a41c";
 let weatherData = null;
 let degrees; // API call returns value in kelvin
 let localStorageSupported = true;
-let cityExistsWithinState;
 let locationID = 0;
+let cityExistsWithinState;
 let currentCity = "";
 let currentCountry = "";
 let currentState = "";
@@ -119,7 +119,7 @@ async function getWeather(
   state = undefined,
 ) {
   if (state) {
-    console.log(state);
+    console.log("reached");
     await fetch(
       `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state ? `${state},` : ""}${country}&appid=${key}`,
     )
@@ -129,9 +129,9 @@ async function getWeather(
       .then((location) => {
         if (!location[0]) {
           // no city matching name in state
-          cityExistsWithinState = false;
+          let cityExistsWithinState = false;
         } else {
-          cityExistsWithinState = true;
+          let cityExistsWithinState = true;
         }
       })
       .catch((err) => {
@@ -156,7 +156,7 @@ async function getWeather(
   // Makes toggle unit and save location buttons available after inital fetch
   toggleUnitBtn.classList.remove("hidden");
   saveBtn.classList.remove("hidden");
-  if (!cityExistsWithinState && !calledViaSavedLocationBtn) {
+  if (cityExistsWithinState === false && !calledViaSavedLocationBtn) {
     console.warn(
       `There is no ${city} within ${state}, displaying results for the largest city named ${city} within the ${country} instead.`,
     );
@@ -168,7 +168,6 @@ locationInputForm.addEventListener("submit", (event) => {
   currentCity = cityInputEl.value;
   currentCountry = countryInputEl.value;
   currentState = stateInputEl.value;
-  console.log(Boolean(currentState));
   getWeather(
     currentCity,
     currentCountry,
