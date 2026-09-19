@@ -18,6 +18,7 @@ let weatherData = null;
 let degrees; // API call returns value in kelvin
 let localStorageSupported = true;
 let cityExistsWithinState;
+let locationID = 0;
 let currentCity = "";
 let currentCountry = "";
 let currentState = "";
@@ -59,16 +60,21 @@ function utilizeFetchBtn(
     state: state,
   };
   savedLocationsEl.append(locationEl);
-  let localStorageKey = crypto.randomUUID();
-  localStorage.setItem(localStorageKey, JSON.stringify(savedLocationObj));
+  locationID++;
+  locationEl.id = `location-${locationID}`;
+  localStorage.setItem(
+    `location-${locationID}`,
+    JSON.stringify(savedLocationObj),
+  );
   savedLocationBtn.addEventListener("click", () => {
-    getWeather(city, country, true, state);
+    getWeather(city, country, state);
   });
   removeSavedLocationBtn.addEventListener("click", () => {
+    localStorage.removeItem(locationEl.id);
     locationEl.remove();
-    localStorage.removeItem(localStorageKey);
   });
 }
+
 function createFetchBtn(city, country, state = "") {
   const savedLocationContainerEl = document.createElement("div");
   const savedLocationBtn = document.createElement("button");
@@ -89,9 +95,8 @@ function createFetchBtn(city, country, state = "") {
 }
 
 if (localStorage.length > 0) {
-  for (let key of Object.keys(localStorage)) {
-    console.log(key);
-    const savedLocation = JSON.parse(localStorage.getItem(key));
+  for (let i = 1; i <= localStorage.length; i++) {
+    const savedLocation = JSON.parse(localStorage.getItem(`location-${i}`));
     const savedLocationCity = savedLocation.city;
     const savedLocationCountry = savedLocation.country;
     const savedLocationState = savedLocation.state;
@@ -100,10 +105,11 @@ if (localStorage.length > 0) {
 }
 
 // Fetches weather from open weather map api
-async function getWeather(city, country, calledViaSavedLocationBtn, state) {
+async function getWeather(city, country, state = "") {
   if (state) {
+    // Checks if there is not a city present in that state
     await fetch(
-      `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state ? `${state},` : ""}${country}&appid=${key}`,
+      `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=${key}`,
     )
       .then((res) => {
         return res.json();
@@ -111,9 +117,9 @@ async function getWeather(city, country, calledViaSavedLocationBtn, state) {
       .then((location) => {
         if (!location[0]) {
           // no city matching name in state
-          let cityExistsWithinState = false;
+          cityExistsWithinState = false;
         } else {
-          let cityExistsWithinState = true;
+          cityExistsWithinState = true;
         }
       })
       .catch((err) => {
@@ -121,7 +127,7 @@ async function getWeather(city, country, calledViaSavedLocationBtn, state) {
       });
   }
   await fetch(
-    `https://api.openweathermap.org/data/2.5/weather?q=${city},${state ? `${state},` : ""}${country}&appid=${key}`,
+    `https://api.openweathermap.org/data/2.5/weather?q=${city},${state},${country}&appid=${key}`,
     { mode: `cors` },
   )
     .then((response) => {
@@ -135,24 +141,18 @@ async function getWeather(city, country, calledViaSavedLocationBtn, state) {
   // Makes toggle unit and save location buttons available after inital fetch
   toggleUnitBtn.classList.remove("hidden");
   saveBtn.classList.remove("hidden");
-  if (cityExistsWithinState === false && !calledViaSavedLocationBtn) {
+  if (!cityExistsWithinState) {
     console.warn(
       `There is no ${city} within ${state}, displaying results for the largest city named ${city} within the ${country} instead.`,
     );
   }
 }
-
 locationInputForm.addEventListener("submit", (event) => {
   event.preventDefault();
   currentCity = cityInputEl.value;
   currentCountry = countryInputEl.value;
   currentState = stateInputEl.value;
-  getWeather(
-    currentCity,
-    currentCountry,
-    false,
-    currentState ? currentState : "",
-  );
+  getWeather(currentCity, currentCountry, currentState);
   cityInputEl.value = "";
   countryInputEl.value = "";
   stateInputEl.value = "";
@@ -176,17 +176,13 @@ toggleUnitBtn.addEventListener("click", () => {
 });
 
 saveBtn.addEventListener("click", () => {
-  // Checks if location has been added
   if (
     !document.getElementById(
-      `${currentCity},${cityExistsWithinState ? `${state},` : ""}${currentCountry}`,
+      `${currentCity}, ${cityExistsWithinState ? `${state},` : ""} ${currentCountry}`,
     )
   ) {
-    createFetchBtn(
-      currentCity,
-      currentCountry,
-      currentState ? currentState : "",
-    );
+    // Checks if location has been added
+    createFetchBtn(currentCity, currentCountry, currentState);
   } else {
     console.warn("Location already added");
   }
