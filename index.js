@@ -112,14 +112,8 @@ if (localStorage.length > 0) {
 }
 
 // Fetches weather from open weather map api
-async function getWeather(
-  city,
-  country,
-  calledViaSavedLocationBtn,
-  state = undefined,
-) {
+async function getWeather(city, country, calledViaSavedLocationBtn, state) {
   if (state) {
-    console.log("reached");
     await fetch(
       `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state ? `${state},` : ""}${country}&appid=${key}`,
     )
@@ -138,9 +132,6 @@ async function getWeather(
         console.error(err);
       });
   }
-  console.log(
-    `https://api.openweathermap.org/data/2.5/weather?q=${city},${state ? `${state},` : ""}${country}&appid=${key}`,
-  );
   await fetch(
     `https://api.openweathermap.org/data/2.5/weather?q=${city},${state ? `${state},` : ""}${country}&appid=${key}`,
     { mode: `cors` },
@@ -172,7 +163,7 @@ locationInputForm.addEventListener("submit", (event) => {
     currentCity,
     currentCountry,
     false,
-    currentState ? currentState : undefined,
+    currentState ? currentState : "",
   );
   cityInputEl.value = "";
   countryInputEl.value = "";
