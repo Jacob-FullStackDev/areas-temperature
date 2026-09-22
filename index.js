@@ -17,19 +17,20 @@ true indicates the tempature should be displayed in °F and will be the default 
 undefined indicates no weather data has been fetched. */
 let weatherData = null;
 let localStorageSupported = true;
-let cityExistsWithinState;
 let locationLocalStorageKey = crypto.randomUUID();
 const key = "f604db20a39eb25fb77c35625cd7a41c";
 const currentLocation = {
   city: "",
   state: "",
   country: "",
+  cityWithinState: null,
 };
-function updateCurrentLocationObject(newCity, newCountry, newState) {
-  currentLocation.city = newCity;
-  currentLocation.country = newCountry;
-  currentLocation.state = newState;
-  return currentLocation;
+function updateCurrentLocationObject(cityWithinState) {
+  // Called within checkState to u
+  currentLocation.city = cityInputEl.value;
+  currentLocation.country = countryInputEl.value;
+  currentLocation.state = stateInputEl.value;
+  currentLocation.cityWithinState = cityWithinState;
 }
 
 function storageAvailable() {
@@ -59,13 +60,10 @@ function utilizeLocationBtns(
   savedLocationBtn,
   removeSavedLocationBtn,
   locationContainerEl,
-  city,
-  country,
-  state = "",
 ) {
   // Assigns event listeners to buttons
   savedLocationBtn.addEventListener("click", () => {
-    getWeather(city, country, state);
+    getWeather(false);
   });
   removeSavedLocationBtn.addEventListener("click", () => {
     console.log(locationContainerEl.id);
@@ -74,12 +72,13 @@ function utilizeLocationBtns(
   });
 }
 
-function createLocationBtns(city, country, state = "") {
+function createLocationBtns(city, country, state, id) {
   const savedLocationContainerEl = document.createElement("div");
-  savedLocationContainerEl.id = locationLocalStorageKey;
+  savedLocationContainerEl.id = id;
+  locationLocalStorageKey = crypto.randomUUID();
   const savedLocationBtn = document.createElement("button");
-  savedLocationBtn.id = `${city}, ${cityExistsWithinState ? `${state},` : ""} ${country}`;
-  savedLocationBtn.textContent = `Fetch ${city}, ${cityExistsWithinState ? `${state},` : ""} ${country}`;
+  savedLocationBtn.id = `${city}, ${true ? `${state},` : ""} ${country}`;
+  savedLocationBtn.textContent = `Fetch ${city}, ${true ? `${state},` : ""} ${country}`;
   const removeSavedLocationBtn = document.createElement("button");
   removeSavedLocationBtn.textContent = "Delete location";
   savedLocationContainerEl.append(savedLocationBtn, removeSavedLocationBtn);
@@ -88,9 +87,6 @@ function createLocationBtns(city, country, state = "") {
     savedLocationBtn,
     removeSavedLocationBtn,
     savedLocationContainerEl,
-    city,
-    country,
-    state,
   );
 }
 
@@ -104,12 +100,13 @@ if (localStorage.length > 0) {
       savedLocationCity,
       savedLocationCountry,
       savedLocationState,
+      key,
     );
   }
 }
 
 // Fetches weather from open weather map api
-async function checkState(city, country, state = "") {
+async function checkState(city, country, state, updateLocationObj = false) {
   if (state !== "") {
     // Checks if there is not a city present in that state
     await fetch(
@@ -119,26 +116,24 @@ async function checkState(city, country, state = "") {
         return res.json();
       })
       .then((location) => {
-        console.log(location[0]);
-        if (!location[0]) {
-          // no city matching name in state
-          cityExistsWithinState = false;
-        } else {
-          cityExistsWithinState = true;
-        }
+        console.log(location);
+        // if (!location[0]) {
+        //   // no city matching name in state
+        //   cityWithinState = false;
+        // } else {
+        //   cityWithinState = true;
+        // }
+        // cityWithinState = true;
       })
       .catch((err) => {
         console.error(err);
       });
+    if (updateLocationObj === true) updateCurrentLocationObject(true);
   }
 }
-async function getWeather(city, country, state = "") {
-  checkState(city, country, state);
-  const { city, country, state } = updateCurrentLocationObject(
-    city,
-    country,
-    state,
-  );
+async function getWeather(updateLocationObj = false) {
+  const { city, country, state } = currentLocation;
+  checkState(city, country, state, updateLocationObj);
   let url;
   if (state !== "") {
     url = `https://api.openweathermap.org/data/2.5/weather?q=${city},${state},${country}&appid=${key}`;
@@ -150,6 +145,7 @@ async function getWeather(city, country, state = "") {
       return response.json();
     })
     .then((data) => {
+      console.log(data);
       weatherData = data;
       displayWeather(weatherData);
     })
@@ -157,16 +153,16 @@ async function getWeather(city, country, state = "") {
   // Makes toggle unit and save location buttons available after inital fetch
   toggleUnitBtn.classList.remove("hidden");
   saveBtn.classList.remove("hidden");
-  if (!cityExistsWithinState) {
-    console.warn(
-      `There is no ${city} within ${state}, displaying results for the largest city named ${city} within the ${country} instead.`,
-    );
-  }
+  // if (!cityWithinState) {
+  //   console.warn(
+  //     `There is no ${city} within ${state}, displaying results for the largest city named ${city} within the ${country} instead.`,
+  //   );
+  // }
 }
 
 locationInputForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  getWeather(currentCity, currentCountry, currentState);
+  getWeather(true);
   cityInputEl.value = "";
   countryInputEl.value = "";
   stateInputEl.value = "";
@@ -192,24 +188,23 @@ toggleUnitBtn.addEventListener("click", () => {
 });
 
 saveBtn.addEventListener("click", () => {
+  // Checks if location has been added
   if (
     !document.getElementById(
-      `${currentCity}, ${cityExistsWithinState ? `${state},` : ""} ${currentCountry}`,
+      `${currentLocation.city}, ${cityExistsWithinState ? `${currentLocation.state},` : ""} ${currentLocation.country}`,
     )
   ) {
-    // Checks if location has been added
-    createLocationBtns(currentCity, currentCountry, currentState);
     // Adds to local storage
-    const savedLocationObj = {
-      city: currentCity,
-      country: currentCountry,
-      state: currentState,
-    };
+    createLocationBtns(
+      currentLocation.city,
+      currentLocation.country,
+      currentLocation.state,
+      locationLocalStorageKey,
+    );
     localStorage.setItem(
       locationLocalStorageKey,
-      JSON.stringify(savedLocationObj),
+      JSON.stringify(currentLocation),
     );
-    locationLocalStorageKey = crypto.randomUUID();
   } else {
     console.warn("Location already added");
   }
