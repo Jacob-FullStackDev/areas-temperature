@@ -18,7 +18,7 @@ let weatherData = null;
 let degrees; // API call returns value in kelvin
 let localStorageSupported = true;
 let cityExistsWithinState;
-let locationID = 0;
+let locationLocalStorageKey = crypto.randomUUID();
 let currentCity = "";
 let currentCountry = "";
 let currentState = "";
@@ -46,48 +46,51 @@ if (!storageAvailable()) {
   );
 }
 
-function utilizeFetchBtn(
-  locationEl,
+function utilizeLocationBtns(
   savedLocationBtn,
   removeSavedLocationBtn,
+  locationContainerEl,
   city,
   country,
   state = "",
 ) {
+  // Assigns event listeners to buttons
+  savedLocationBtn.addEventListener("click", () => {
+    getWeather(city, country, state);
+  });
+  removeSavedLocationBtn.addEventListener("click", () => {
+    localStorage.removeItem(locationContainerEl.id);
+    locationEl.remove();
+  });
+}
+
+function storeLocationBtns(city, country, state) {
   const savedLocationObj = {
     city: city,
     country: country,
     state: state,
   };
-  savedLocationsEl.append(locationEl);
-  locationID++;
-  locationEl.id = `location-${locationID}`;
   localStorage.setItem(
-    `location-${locationID}`,
+    locationLocalStorageKey,
     JSON.stringify(savedLocationObj),
   );
-  savedLocationBtn.addEventListener("click", () => {
-    getWeather(city, country, state);
-  });
-  removeSavedLocationBtn.addEventListener("click", () => {
-    localStorage.removeItem(locationEl.id);
-    locationEl.remove();
-  });
+  locationLocalStorageKey = crypto.randomUUID();
 }
 
-function createFetchBtn(city, country, state = "") {
+function createLocationBtns(city, country, state = "") {
   const savedLocationContainerEl = document.createElement("div");
+  savedLocationContainerEl.id = locationLocalStorageKey;
   const savedLocationBtn = document.createElement("button");
-  const removeSavedLocationBtn = document.createElement("button");
   savedLocationBtn.id = `${city}, ${cityExistsWithinState ? `${state},` : ""} ${country}`;
   savedLocationBtn.textContent = `Fetch ${city}, ${cityExistsWithinState ? `${state},` : ""} ${country}`;
+  const removeSavedLocationBtn = document.createElement("button");
   removeSavedLocationBtn.textContent = "Delete location";
   savedLocationContainerEl.append(savedLocationBtn, removeSavedLocationBtn);
   savedLocationsEl.append(savedLocationContainerEl);
-  utilizeFetchBtn(
-    savedLocationContainerEl,
+  utilizeLocationBtns(
     savedLocationBtn,
     removeSavedLocationBtn,
+    savedLocationContainerEl,
     city,
     country,
     state,
@@ -95,18 +98,22 @@ function createFetchBtn(city, country, state = "") {
 }
 
 if (localStorage.length > 0) {
-  for (let i = 1; i <= localStorage.length; i++) {
-    const savedLocation = JSON.parse(localStorage.getItem(`location-${i}`));
+  for (const key of Object.keys(localStorage)) {
+    const savedLocation = JSON.parse(localStorage.getItem(key));
     const savedLocationCity = savedLocation.city;
     const savedLocationCountry = savedLocation.country;
     const savedLocationState = savedLocation.state;
-    createFetchBtn(savedLocationCity, savedLocationCountry, savedLocationState);
+    createLocationBtns(
+      savedLocationCity,
+      savedLocationCountry,
+      savedLocationState,
+    );
   }
 }
 
 // Fetches weather from open weather map api
-async function getWeather(city, country, state = "") {
-  if (state) {
+async function checkState(city, country, state = "") {
+  if (state !== "") {
     // Checks if there is not a city present in that state
     await fetch(
       `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=${key}`,
@@ -126,10 +133,16 @@ async function getWeather(city, country, state = "") {
         console.error(err);
       });
   }
-  await fetch(
-    `https://api.openweathermap.org/data/2.5/weather?q=${city},${state},${country}&appid=${key}`,
-    { mode: `cors` },
-  )
+}
+async function getWeather(city, country, state = "") {
+  checkState(city, country, state);
+  let url;
+  if (state !== "") {
+    url = `https://api.openweathermap.org/data/2.5/weather?q=${city},${state},${country}&appid=${key}`;
+  } else {
+    url = `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=${key}`;
+  }
+  await fetch(url, { mode: `cors` })
     .then((response) => {
       return response.json();
     })
@@ -182,7 +195,8 @@ saveBtn.addEventListener("click", () => {
     )
   ) {
     // Checks if location has been added
-    createFetchBtn(currentCity, currentCountry, currentState);
+    createLocationBtns(currentCity, currentCountry, currentState);
+    storeLocationBtns(currentCity, currentCountry, currentState);
   } else {
     console.warn("Location already added");
   }
