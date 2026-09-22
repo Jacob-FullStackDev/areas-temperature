@@ -15,11 +15,22 @@ const savedLocationsEl = document.getElementById(
 let unitInF; /* False indicates the tempature should be displayed in °C,
 true indicates the tempature should be displayed in °F and will be the default value after the first fetch,
 undefined indicates no weather data has been fetched. */
-const key = "f604db20a39eb25fb77c35625cd7a41c";
 let weatherData = null;
 let localStorageSupported = true;
 let cityExistsWithinState;
 let locationLocalStorageKey = crypto.randomUUID();
+const key = "f604db20a39eb25fb77c35625cd7a41c";
+const currentLocation = {
+  city: "",
+  state: "",
+  country: "",
+};
+function updateCurrentLocationObject(newCity, newCountry, newState) {
+  currentLocation.city = newCity;
+  currentLocation.country = newCountry;
+  currentLocation.state = newState;
+  return currentLocation;
+}
 
 function storageAvailable() {
   try {
@@ -57,6 +68,7 @@ function utilizeLocationBtns(
     getWeather(city, country, state);
   });
   removeSavedLocationBtn.addEventListener("click", () => {
+    console.log(locationContainerEl.id);
     localStorage.removeItem(locationContainerEl.id);
     locationContainerEl.remove();
   });
@@ -122,6 +134,11 @@ async function checkState(city, country, state = "") {
 }
 async function getWeather(city, country, state = "") {
   checkState(city, country, state);
+  const { city, country, state } = updateCurrentLocationObject(
+    city,
+    country,
+    state,
+  );
   let url;
   if (state !== "") {
     url = `https://api.openweathermap.org/data/2.5/weather?q=${city},${state},${country}&appid=${key}`;
@@ -146,20 +163,15 @@ async function getWeather(city, country, state = "") {
     );
   }
 }
-function setLocationValues() {
-  let currentCity = cityInputEl.value;
-  let currentCountry = countryInputEl.value;
-  let currentState = stateInputEl.value;
-  return { currentCity, currentCountry, currentState };
-}
+
 locationInputForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const { currentCity, currentCountry, currentState } = setLocationValues();
   getWeather(currentCity, currentCountry, currentState);
   cityInputEl.value = "";
   countryInputEl.value = "";
   stateInputEl.value = "";
 });
+
 // Displays weather and handles tempature units
 function displayWeather(weather) {
   let degrees; // API call returns temperature in kelvin
@@ -180,7 +192,6 @@ toggleUnitBtn.addEventListener("click", () => {
 });
 
 saveBtn.addEventListener("click", () => {
-  const { currentCity, currentCountry, currentState } = setLocationValues();
   if (
     !document.getElementById(
       `${currentCity}, ${cityExistsWithinState ? `${state},` : ""} ${currentCountry}`,
@@ -190,9 +201,9 @@ saveBtn.addEventListener("click", () => {
     createLocationBtns(currentCity, currentCountry, currentState);
     // Adds to local storage
     const savedLocationObj = {
-      city: city,
-      country: country,
-      state: state,
+      city: currentCity,
+      country: currentCountry,
+      state: currentState,
     };
     localStorage.setItem(
       locationLocalStorageKey,
