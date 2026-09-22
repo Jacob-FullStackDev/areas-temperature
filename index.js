@@ -65,19 +65,6 @@ function utilizeLocationBtns(
   });
 }
 
-function storeLocationBtns(city, country, state) {
-  const savedLocationObj = {
-    city: city,
-    country: country,
-    state: state,
-  };
-  localStorage.setItem(
-    locationLocalStorageKey,
-    JSON.stringify(savedLocationObj),
-  );
-  locationLocalStorageKey = crypto.randomUUID();
-}
-
 function createLocationBtns(city, country, state = "") {
   const savedLocationContainerEl = document.createElement("div");
   savedLocationContainerEl.id = locationLocalStorageKey;
@@ -123,6 +110,7 @@ async function checkState(city, country, state = "") {
         return res.json();
       })
       .then((location) => {
+        console.log(location[0]);
         if (!location[0]) {
           // no city matching name in state
           cityExistsWithinState = false;
@@ -198,7 +186,17 @@ saveBtn.addEventListener("click", () => {
   ) {
     // Checks if location has been added
     createLocationBtns(currentCity, currentCountry, currentState);
-    storeLocationBtns(currentCity, currentCountry, currentState);
+    // Adds to local storage
+    const savedLocationObj = {
+      city: city,
+      country: country,
+      state: state,
+    };
+    localStorage.setItem(
+      locationLocalStorageKey,
+      JSON.stringify(savedLocationObj),
+    );
+    locationLocalStorageKey = crypto.randomUUID();
   } else {
     console.warn("Location already added");
   }
