@@ -58,7 +58,7 @@ function utilizeLocationBtns(
   });
   removeSavedLocationBtn.addEventListener("click", () => {
     localStorage.removeItem(locationContainerEl.id);
-    locationEl.remove();
+    locationContainerEl.remove();
   });
 }
 
