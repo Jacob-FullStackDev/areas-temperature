@@ -20,9 +20,6 @@ let weatherData = null;
 let localStorageSupported = true;
 let cityExistsWithinState;
 let locationLocalStorageKey = crypto.randomUUID();
-let currentCity = "";
-let currentCountry = "";
-let currentState = "";
 
 function storageAvailable() {
   try {
@@ -149,11 +146,15 @@ async function getWeather(city, country, state = "") {
     );
   }
 }
+function setLocationValues() {
+  let currentCity = cityInputEl.value;
+  let currentCountry = countryInputEl.value;
+  let currentState = stateInputEl.value;
+  return { currentCity, currentCountry, currentState };
+}
 locationInputForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  currentCity = cityInputEl.value;
-  currentCountry = countryInputEl.value;
-  currentState = stateInputEl.value;
+  const { currentCity, currentCountry, currentState } = setLocationValues();
   getWeather(currentCity, currentCountry, currentState);
   cityInputEl.value = "";
   countryInputEl.value = "";
@@ -179,6 +180,7 @@ toggleUnitBtn.addEventListener("click", () => {
 });
 
 saveBtn.addEventListener("click", () => {
+  const { currentCity, currentCountry, currentState } = setLocationValues();
   if (
     !document.getElementById(
       `${currentCity}, ${cityExistsWithinState ? `${state},` : ""} ${currentCountry}`,
