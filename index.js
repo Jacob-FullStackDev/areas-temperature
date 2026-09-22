@@ -12,10 +12,11 @@ const savedLocationsEl = document.getElementById(
 
 /* INITIAL STATE */
 
-let unitInF; /* False means the tempature will be displayed in °C true means the tempature will be displayed in °F and will be the default value after the first fetch, when empty means no weather data has been fetched. */
+let unitInF; /* False indicates the tempature should be displayed in °C,
+true indicates the tempature should be displayed in °F and will be the default value after the first fetch,
+undefined indicates no weather data has been fetched. */
 const key = "f604db20a39eb25fb77c35625cd7a41c";
 let weatherData = null;
-let degrees; // API call returns value in kelvin
 let localStorageSupported = true;
 let cityExistsWithinState;
 let locationLocalStorageKey = crypto.randomUUID();
@@ -172,6 +173,7 @@ locationInputForm.addEventListener("submit", (event) => {
 });
 // Displays weather and handles tempature units
 function displayWeather(weather) {
+  let degrees; // API call returns temperature in kelvin
   if (!unitInF) {
     toggleUnitBtn.textContent = "In fahrenheit";
     degrees = Math.round(((weather.main.temp - 273.15) * 9) / 5 + 32);
