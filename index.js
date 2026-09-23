@@ -30,7 +30,6 @@ function updateCurrentLocationObject(city, country, state, cityWithinStateRes) {
   currentLocation.country = country;
   currentLocation.state = state;
   currentLocation.cityWithinState = cityWithinStateRes;
-  console.log(currentLocation);
 }
 
 function storageAvailable() {
@@ -121,7 +120,6 @@ async function checkState(city, country, state) {
         return res.json();
       })
       .then((location) => {
-        console.log(location);
         // if (!location[0]) {
         //   // no city matching name in state
         //   cityWithinState = false;
@@ -197,25 +195,24 @@ toggleUnitBtn.addEventListener("click", () => {
 
 saveBtn.addEventListener("click", () => {
   // Checks if location has been added
-  // if (
-  //   !document.getElementById(
-  //     `${currentLocation.city}, ${currentLocation.cityWithinState ? `${currentLocation.state},` : ""} ${currentLocation.country}`,
-  //   )
-  // ) {
-  // Adds to local storage
-  createLocationBtns(
-    currentLocation.city,
-    currentLocation.country,
-    currentLocation.state,
-    locationLocalStorageKey,
-  );
-  localStorage.setItem(
-    locationLocalStorageKey,
-    JSON.stringify(currentLocation),
-  );
-  locationLocalStorageKey = crypto.randomUUID(); // Generates new random key for localStorage
-  console.log("After add", localStorage);
-  // } else {
-  //   console.warn("Location already added");
-  // }
+  if (
+    !document.getElementById(
+      `${currentLocation.city}, ${currentLocation.cityWithinState ? `${currentLocation.state},` : ""} ${currentLocation.country}`,
+    )
+  ) {
+    // Adds to local storage
+    createLocationBtns(
+      currentLocation.city,
+      currentLocation.country,
+      currentLocation.state,
+      locationLocalStorageKey,
+    );
+    localStorage.setItem(
+      locationLocalStorageKey,
+      JSON.stringify(currentLocation),
+    );
+    locationLocalStorageKey = crypto.randomUUID(); // Generates new random key for localStorage
+  } else {
+    console.warn("Location already added");
+  }
 });
