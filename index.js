@@ -32,6 +32,8 @@ function updateCurrentLocationObject(city, country, state, cityWithinStateRes) {
   currentLocation.cityWithinState = cityWithinStateRes;
 }
 
+/* LOCAL STORAGE */
+
 function storageAvailable() {
   try {
     let storage = window["sessionStorage"];
@@ -54,61 +56,8 @@ if (!storageAvailable()) {
     "Local storage is unsupported, saved locations will be cleared after you exit or refresh the page",
   );
 }
+/* GET WEATHER DATA */
 
-function utilizeLocationBtns(
-  savedLocationBtn,
-  removeSavedLocationBtn,
-  locationContainerEl,
-  city,
-  country,
-  state,
-) {
-  // Assigns event listeners to buttons
-  savedLocationBtn.addEventListener("click", () => {
-    getWeather(city, country, state);
-  });
-  removeSavedLocationBtn.addEventListener("click", () => {
-    localStorage.removeItem(locationContainerEl.id);
-    locationContainerEl.remove();
-  });
-}
-
-function createLocationBtns(city, country, state, id) {
-  const savedLocationContainerEl = document.createElement("div");
-  savedLocationContainerEl.id = id;
-  const savedLocationBtn = document.createElement("button");
-  savedLocationBtn.id = `${city}, ${true ? `${state},` : ""} ${country}`;
-  savedLocationBtn.textContent = `Fetch ${city}, ${true ? `${state},` : ""} ${country}`;
-  const removeSavedLocationBtn = document.createElement("button");
-  removeSavedLocationBtn.textContent = "Delete location";
-  savedLocationContainerEl.append(savedLocationBtn, removeSavedLocationBtn);
-  savedLocationsEl.append(savedLocationContainerEl);
-  utilizeLocationBtns(
-    savedLocationBtn,
-    removeSavedLocationBtn,
-    savedLocationContainerEl,
-    city,
-    country,
-    state,
-  );
-}
-
-if (localStorage.length > 0) {
-  for (const key of Object.keys(localStorage)) {
-    const savedLocation = JSON.parse(localStorage.getItem(key));
-    const savedLocationCity = savedLocation.city;
-    const savedLocationCountry = savedLocation.country;
-    const savedLocationState = savedLocation.state;
-    createLocationBtns(
-      savedLocationCity,
-      savedLocationCountry,
-      savedLocationState,
-      key,
-    );
-  }
-}
-
-// Fetches weather from open weather map api
 async function checkState(city, country, state) {
   if (state !== "") {
     let cityWithinState = true;
@@ -138,6 +87,8 @@ async function checkState(city, country, state) {
     currentLocation.cityWithinState = "N/A"; // No state provided
   }
 }
+
+// Fetches weather from open weather map API
 async function getWeather(city, country, state) {
   checkState(city, country, state);
   let url;
@@ -168,16 +119,63 @@ async function getWeather(city, country, state) {
   }
 }
 
-locationInputForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  let temporaryCity = cityInputEl.value;
-  let temporaryCountry = countryInputEl.value;
-  let temporaryState = stateInputEl.value;
-  getWeather(temporaryCity, temporaryCountry, temporaryState);
-  cityInputEl.value = "";
-  countryInputEl.value = "";
-  stateInputEl.value = "";
-});
+/* CREATE SAVED LOCATION BUTTONS */
+
+function utilizeLocationBtns(
+  savedLocationBtn,
+  removeSavedLocationBtn,
+  locationContainerEl,
+  city,
+  country,
+  state,
+) {
+  // Assigns event listeners to buttons
+  savedLocationBtn.addEventListener("click", () => {
+    console.log("reached");
+    getWeather(city, country, state);
+  });
+  removeSavedLocationBtn.addEventListener("click", () => {
+    localStorage.removeItem(locationContainerEl.id);
+    locationContainerEl.remove();
+  });
+}
+
+function createLocationBtns(city, country, state, id) {
+  const savedLocationContainerEl = document.createElement("div");
+  savedLocationContainerEl.id = id;
+  const savedLocationBtn = document.createElement("button");
+  savedLocationBtn.id = `${city}, ${true ? `${state},` : ""} ${country}`;
+  savedLocationBtn.textContent = `Fetch ${city}, ${true ? `${state},` : ""} ${country}`;
+  const removeSavedLocationBtn = document.createElement("button");
+  removeSavedLocationBtn.textContent = "Delete location";
+  savedLocationContainerEl.append(savedLocationBtn, removeSavedLocationBtn);
+  savedLocationsEl.append(savedLocationContainerEl);
+  utilizeLocationBtns(
+    savedLocationBtn,
+    removeSavedLocationBtn,
+    savedLocationContainerEl,
+    city,
+    country,
+    state,
+  );
+}
+
+/* CREATE SAVED LOCATION BUTTONS FROM LOCALSTORAGE */
+
+if (localStorage.length > 0) {
+  for (const key of Object.keys(localStorage)) {
+    const savedLocation = JSON.parse(localStorage.getItem(key));
+    const savedLocationCity = savedLocation.city;
+    const savedLocationCountry = savedLocation.country;
+    const savedLocationState = savedLocation.state;
+    createLocationBtns(
+      savedLocationCity,
+      savedLocationCountry,
+      savedLocationState,
+      key,
+    );
+  }
+}
 
 // Displays weather and handles tempature units
 function displayWeather(weather) {
@@ -193,6 +191,20 @@ function displayWeather(weather) {
   }
 }
 
+/* EVENT LISTENERS */
+
+locationInputForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  let temporaryCity = cityInputEl.value;
+  let temporaryCountry = countryInputEl.value;
+  let temporaryState = stateInputEl.value;
+  console.log(temporaryCity, temporaryCountry, temporaryState);
+  getWeather(temporaryCity, temporaryCountry, temporaryState);
+  cityInputEl.value = "";
+  countryInputEl.value = "";
+  stateInputEl.value = "";
+});
+
 toggleUnitBtn.addEventListener("click", () => {
   unitInF = !unitInF; // Flips to opposite unit
   displayWeather(weatherData);
@@ -206,6 +218,7 @@ saveBtn.addEventListener("click", () => {
     )
   ) {
     // Adds to local storage
+    console.log(currentLocation);
     createLocationBtns(
       currentLocation.city,
       currentLocation.country,
