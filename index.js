@@ -77,7 +77,6 @@ function utilizeLocationBtns(
 function createLocationBtns(city, country, state, id) {
   const savedLocationContainerEl = document.createElement("div");
   savedLocationContainerEl.id = id;
-  locationLocalStorageKey = crypto.randomUUID();
   const savedLocationBtn = document.createElement("button");
   savedLocationBtn.id = `${city}, ${true ? `${state},` : ""} ${country}`;
   savedLocationBtn.textContent = `Fetch ${city}, ${true ? `${state},` : ""} ${country}`;
@@ -89,6 +88,9 @@ function createLocationBtns(city, country, state, id) {
     savedLocationBtn,
     removeSavedLocationBtn,
     savedLocationContainerEl,
+    city,
+    country,
+    state,
   );
 }
 
@@ -149,7 +151,6 @@ async function getWeather(city, country, state) {
       return response.json();
     })
     .then((data) => {
-      console.log(data);
       weatherData = data;
       displayWeather(weatherData);
     })
@@ -212,6 +213,8 @@ saveBtn.addEventListener("click", () => {
     locationLocalStorageKey,
     JSON.stringify(currentLocation),
   );
+  locationLocalStorageKey = crypto.randomUUID(); // Generates new random key for localStorage
+  console.log("After add", localStorage);
   // } else {
   //   console.warn("Location already added");
   // }
