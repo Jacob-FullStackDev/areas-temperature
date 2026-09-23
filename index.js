@@ -120,13 +120,13 @@ async function checkState(city, country, state) {
         return res.json();
       })
       .then((location) => {
-        // if (!location[0]) {
-        //   // no city matching name in state
-        //   cityWithinState = false;
-        // } else {
-        //   cityWithinState = true;
-        // }
-        // cityWithinState = true;
+        if (!location[0]) {
+          // no city matching name in state
+          cityWithinState = false;
+        } else {
+          cityWithinState = true;
+        }
+        cityWithinState = true;
       })
       .catch((err) => {
         console.error(err);
@@ -134,6 +134,8 @@ async function checkState(city, country, state) {
     if (cityWithinState) {
       updateCurrentLocationObject(city, country, state, true);
     } else updateCurrentLocationObject(city, country, state, false);
+  } else {
+    currentLocation.cityWithinState = "N/A"; // No state provided
   }
 }
 async function getWeather(city, country, state) {
@@ -156,11 +158,14 @@ async function getWeather(city, country, state) {
   // Makes toggle unit and save location buttons available after inital fetch
   toggleUnitBtn.classList.remove("hidden");
   saveBtn.classList.remove("hidden");
-  // if (!cityWithinState) {
-  //   console.warn(
-  //     `There is no ${city} within ${state}, displaying results for the largest city named ${city} within the ${country} instead.`,
-  //   );
-  // }
+  if (
+    !currentLocation.cityWithinState ||
+    currentLocation.cityWithinState !== "N/A"
+  ) {
+    console.warn(
+      `There is no ${city} within ${state}, displaying results for the largest city named ${city} within the ${country} instead.`,
+    );
+  }
 }
 
 locationInputForm.addEventListener("submit", (event) => {
@@ -197,7 +202,7 @@ saveBtn.addEventListener("click", () => {
   // Checks if location has been added
   if (
     !document.getElementById(
-      `${currentLocation.city}, ${currentLocation.cityWithinState ? `${currentLocation.state},` : ""} ${currentLocation.country}`,
+      `${currentLocation.city}, ${currentLocation.cityWithinState ? `${currentLocation.state}, ` : ""}${currentLocation.country}`,
     )
   ) {
     // Adds to local storage
