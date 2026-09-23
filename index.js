@@ -25,12 +25,12 @@ const currentLocation = {
   country: "",
   cityWithinState: null,
 };
-function updateCurrentLocationObject(cityWithinState) {
-  // Called within checkState to u
-  currentLocation.city = cityInputEl.value;
-  currentLocation.country = countryInputEl.value;
-  currentLocation.state = stateInputEl.value;
-  currentLocation.cityWithinState = cityWithinState;
+function updateCurrentLocationObject(city, country, state, cityWithinStateRes) {
+  currentLocation.city = city;
+  currentLocation.country = country;
+  currentLocation.state = state;
+  currentLocation.cityWithinState = cityWithinStateRes;
+  console.log(currentLocation);
 }
 
 function storageAvailable() {
@@ -60,13 +60,15 @@ function utilizeLocationBtns(
   savedLocationBtn,
   removeSavedLocationBtn,
   locationContainerEl,
+  city,
+  country,
+  state,
 ) {
   // Assigns event listeners to buttons
   savedLocationBtn.addEventListener("click", () => {
-    getWeather(false);
+    getWeather(city, country, state);
   });
   removeSavedLocationBtn.addEventListener("click", () => {
-    console.log(locationContainerEl.id);
     localStorage.removeItem(locationContainerEl.id);
     locationContainerEl.remove();
   });
@@ -106,8 +108,9 @@ if (localStorage.length > 0) {
 }
 
 // Fetches weather from open weather map api
-async function checkState(city, country, state, updateLocationObj = false) {
+async function checkState(city, country, state) {
   if (state !== "") {
+    let cityWithinState = true;
     // Checks if there is not a city present in that state
     await fetch(
       `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=${key}`,
@@ -128,12 +131,13 @@ async function checkState(city, country, state, updateLocationObj = false) {
       .catch((err) => {
         console.error(err);
       });
-    if (updateLocationObj === true) updateCurrentLocationObject(true);
+    if (cityWithinState) {
+      updateCurrentLocationObject(city, country, state, true);
+    } else updateCurrentLocationObject(city, country, state, false);
   }
 }
-async function getWeather(updateLocationObj = false) {
-  const { city, country, state } = currentLocation;
-  checkState(city, country, state, updateLocationObj);
+async function getWeather(city, country, state) {
+  checkState(city, country, state);
   let url;
   if (state !== "") {
     url = `https://api.openweathermap.org/data/2.5/weather?q=${city},${state},${country}&appid=${key}`;
@@ -162,7 +166,10 @@ async function getWeather(updateLocationObj = false) {
 
 locationInputForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  getWeather(true);
+  let temporaryCity = cityInputEl.value;
+  let temporaryCountry = countryInputEl.value;
+  let temporaryState = stateInputEl.value;
+  getWeather(temporaryCity, temporaryCountry, temporaryState);
   cityInputEl.value = "";
   countryInputEl.value = "";
   stateInputEl.value = "";
@@ -189,23 +196,23 @@ toggleUnitBtn.addEventListener("click", () => {
 
 saveBtn.addEventListener("click", () => {
   // Checks if location has been added
-  if (
-    !document.getElementById(
-      `${currentLocation.city}, ${cityExistsWithinState ? `${currentLocation.state},` : ""} ${currentLocation.country}`,
-    )
-  ) {
-    // Adds to local storage
-    createLocationBtns(
-      currentLocation.city,
-      currentLocation.country,
-      currentLocation.state,
-      locationLocalStorageKey,
-    );
-    localStorage.setItem(
-      locationLocalStorageKey,
-      JSON.stringify(currentLocation),
-    );
-  } else {
-    console.warn("Location already added");
-  }
+  // if (
+  //   !document.getElementById(
+  //     `${currentLocation.city}, ${currentLocation.cityWithinState ? `${currentLocation.state},` : ""} ${currentLocation.country}`,
+  //   )
+  // ) {
+  // Adds to local storage
+  createLocationBtns(
+    currentLocation.city,
+    currentLocation.country,
+    currentLocation.state,
+    locationLocalStorageKey,
+  );
+  localStorage.setItem(
+    locationLocalStorageKey,
+    JSON.stringify(currentLocation),
+  );
+  // } else {
+  //   console.warn("Location already added");
+  // }
 });
