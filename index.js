@@ -31,7 +31,6 @@ function updateCurrentLocationObject(
   cityWithinStateRes,
   state = "",
 ) {
-  // TODO: implement state so it defaults to an empty string
   currentLocation.city = city;
   currentLocation.country = country;
   currentLocation.state = state;
@@ -79,8 +78,8 @@ function displayWeather(weather) {
 }
 
 async function checkState(city, country, state) {
+  let cityWithinState;
   if (state !== "") {
-    console.log("state is not empty");
     // Checks if there is not a city present in that state
     await fetch(
       `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=${key}`,
@@ -89,10 +88,9 @@ async function checkState(city, country, state) {
         return res.json();
       })
       .then((location) => {
-        console.log(location);
-        let cityWithinState;
         if (!location[0]) {
-          // no city matching name in state
+          console.log("reached false");
+          // No city matching name in state
           cityWithinState = false;
         } else {
           cityWithinState = true;
@@ -106,11 +104,9 @@ async function checkState(city, country, state) {
       updateCurrentLocationObject(city, country, true, state);
     } else {
       console.log("reached false");
-      // TODO: Set state to empty string when this happens
       updateCurrentLocationObject(city, country, false);
     }
   } else {
-    // TODO: Update currentLocation
     updateCurrentLocationObject(city, country, "N/A"); // No state provided
   }
   console.log(currentLocation);
@@ -167,12 +163,23 @@ function utilizeLocationBtns(
   });
 }
 
+function handleStateValue(state) {
+  switch (currentLocation.cityWithinState) {
+    case "":
+    case "N/A":
+      return "";
+    case !"":
+      console.log("reached");
+      return `${state}, `;
+  }
+}
+
 function createLocationBtns(city, country, state, id) {
   const savedLocationContainerEl = document.createElement("div");
   savedLocationContainerEl.id = id;
   const savedLocationBtn = document.createElement("button");
-  savedLocationBtn.id = `${city}, ${true ? `${state},` : ""} ${country}`;
-  savedLocationBtn.textContent = `Fetch ${city}, ${true ? `${state},` : ""} ${country}`;
+  savedLocationBtn.id = `${city}, ${handleStateValue(state)}${country}`;
+  savedLocationBtn.textContent = `Fetch ${city}, ${handleStateValue(state)}${country}`;
   const removeSavedLocationBtn = document.createElement("button");
   removeSavedLocationBtn.textContent = "Delete location";
   savedLocationContainerEl.append(savedLocationBtn, removeSavedLocationBtn);
@@ -227,7 +234,7 @@ saveBtn.addEventListener("click", () => {
   // Checks if location has been added
   if (
     !document.getElementById(
-      `${currentLocation.city}, ${currentLocation.cityWithinState ? `${currentLocation.state}, ` : ""}${currentLocation.country}`,
+      `${currentLocation.city}, ${handleStateValue(state)}${currentLocation.country}`,
     )
   ) {
     // Adds to local storage
