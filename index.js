@@ -33,8 +33,8 @@ function updateCurrentLocationObject(
 ) {
   currentLocation.city = city;
   currentLocation.country = country;
-  currentLocation.state = state;
   currentLocation.cityWithinState = cityWithinStateRes;
+  currentLocation.state = state;
 }
 
 /* LOCAL STORAGE */
@@ -89,7 +89,6 @@ async function checkState(city, country, state) {
       })
       .then((location) => {
         if (!location[0]) {
-          console.log("reached false");
           // No city matching name in state
           cityWithinState = false;
         } else {
@@ -100,16 +99,13 @@ async function checkState(city, country, state) {
         console.error(err);
       });
     if (cityWithinState) {
-      console.log("reached true");
       updateCurrentLocationObject(city, country, true, state);
     } else {
-      console.log("reached false");
       updateCurrentLocationObject(city, country, false);
     }
   } else {
     updateCurrentLocationObject(city, country, "N/A"); // No state provided
   }
-  console.log(currentLocation);
 }
 
 // Fetches weather from open weather map API
@@ -163,23 +159,22 @@ function utilizeLocationBtns(
   });
 }
 
-function handleStateValue(state) {
-  switch (currentLocation.cityWithinState) {
+function handleStateValue(obj, state) {
+  switch (obj.cityWithinState) {
     case "":
     case "N/A":
       return "";
-    case !"":
-      console.log("reached");
+    case true:
       return `${state}, `;
   }
 }
 
-function createLocationBtns(city, country, state, id) {
+function createLocationBtns(city, country, state, id, obj) {
   const savedLocationContainerEl = document.createElement("div");
   savedLocationContainerEl.id = id;
   const savedLocationBtn = document.createElement("button");
-  savedLocationBtn.id = `${city}, ${handleStateValue(state)}${country}`;
-  savedLocationBtn.textContent = `Fetch ${city}, ${handleStateValue(state)}${country}`;
+  savedLocationBtn.id = `${city}, ${handleStateValue(obj, state)}${country}`;
+  savedLocationBtn.textContent = `Fetch ${city}, ${handleStateValue(obj, state)}${country}`;
   const removeSavedLocationBtn = document.createElement("button");
   removeSavedLocationBtn.textContent = "Delete location";
   savedLocationContainerEl.append(savedLocationBtn, removeSavedLocationBtn);
@@ -207,6 +202,7 @@ if (localStorage.length > 0) {
       savedLocationCountry,
       savedLocationState,
       key,
+      savedLocation,
     );
   }
 }
@@ -230,20 +226,20 @@ toggleUnitBtn.addEventListener("click", () => {
 });
 
 saveBtn.addEventListener("click", () => {
-  console.log(currentLocation);
   // Checks if location has been added
   if (
     !document.getElementById(
       `${currentLocation.city}, ${handleStateValue(state)}${currentLocation.country}`,
     )
   ) {
-    // Adds to local storage
     createLocationBtns(
       currentLocation.city,
       currentLocation.country,
       currentLocation.state,
       locationLocalStorageKey,
+      currentLocation,
     );
+    // Adds to local storage
     localStorage.setItem(
       locationLocalStorageKey,
       JSON.stringify(currentLocation),
