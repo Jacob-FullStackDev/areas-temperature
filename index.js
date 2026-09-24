@@ -25,7 +25,13 @@ const currentLocation = {
   country: "",
   cityWithinState: null,
 };
-function updateCurrentLocationObject(city, country, state, cityWithinStateRes) {
+function updateCurrentLocationObject(
+  city,
+  country,
+  cityWithinStateRes,
+  state = "",
+) {
+  // TODO: implement state so it defaults to an empty string
   currentLocation.city = city;
   currentLocation.country = country;
   currentLocation.state = state;
@@ -58,9 +64,23 @@ if (!storageAvailable()) {
 }
 /* GET WEATHER DATA */
 
+// Displays weather and handles tempature units
+function displayWeather(weather) {
+  let degrees; // API call returns temperature in kelvin
+  if (!unitInF) {
+    toggleUnitBtn.textContent = "In fahrenheit";
+    degrees = Math.round(((weather.main.temp - 273.15) * 9) / 5 + 32);
+    weatherDisplayEl.textContent = `It is currently ${degrees} °F in ${weather.name}, ${weather.sys.country}`;
+  } else if (unitInF) {
+    toggleUnitBtn.textContent = "In celsius";
+    degrees = Math.round(weather.main.temp - 273.15);
+    weatherDisplayEl.textContent = `It is currently ${degrees} °C in ${weather.name}, ${weather.sys.country}`;
+  }
+}
+
 async function checkState(city, country, state) {
   if (state !== "") {
-    let cityWithinState = true;
+    console.log("state is not empty");
     // Checks if there is not a city present in that state
     await fetch(
       `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=${key}`,
@@ -69,23 +89,31 @@ async function checkState(city, country, state) {
         return res.json();
       })
       .then((location) => {
+        console.log(location);
+        let cityWithinState;
         if (!location[0]) {
           // no city matching name in state
           cityWithinState = false;
         } else {
           cityWithinState = true;
         }
-        cityWithinState = true;
       })
       .catch((err) => {
         console.error(err);
       });
     if (cityWithinState) {
-      updateCurrentLocationObject(city, country, state, true);
-    } else updateCurrentLocationObject(city, country, state, false);
+      console.log("reached true");
+      updateCurrentLocationObject(city, country, true, state);
+    } else {
+      console.log("reached false");
+      // TODO: Set state to empty string when this happens
+      updateCurrentLocationObject(city, country, false);
+    }
   } else {
-    currentLocation.cityWithinState = "N/A"; // No state provided
+    // TODO: Update currentLocation
+    updateCurrentLocationObject(city, country, "N/A"); // No state provided
   }
+  console.log(currentLocation);
 }
 
 // Fetches weather from open weather map API
@@ -114,7 +142,7 @@ async function getWeather(city, country, state) {
     currentLocation.cityWithinState !== "N/A"
   ) {
     console.warn(
-      `There is no ${city} within ${state}, displaying results for the largest city named ${city} within the ${country} instead.`,
+      `There is no ${city} within ${state}, displaying results for the largest city named ${city} within the ${country} instead. Saving this location will also get the temperature for the largest city.`,
     );
   }
 }
@@ -131,7 +159,6 @@ function utilizeLocationBtns(
 ) {
   // Assigns event listeners to buttons
   savedLocationBtn.addEventListener("click", () => {
-    console.log("reached");
     getWeather(city, country, state);
   });
   removeSavedLocationBtn.addEventListener("click", () => {
@@ -177,28 +204,13 @@ if (localStorage.length > 0) {
   }
 }
 
-// Displays weather and handles tempature units
-function displayWeather(weather) {
-  let degrees; // API call returns temperature in kelvin
-  if (!unitInF) {
-    toggleUnitBtn.textContent = "In fahrenheit";
-    degrees = Math.round(((weather.main.temp - 273.15) * 9) / 5 + 32);
-    weatherDisplayEl.textContent = `It is currently ${degrees} °F in ${weather.name}, ${weather.sys.country}`;
-  } else if (unitInF) {
-    toggleUnitBtn.textContent = "In celsius";
-    degrees = Math.round(weather.main.temp - 273.15);
-    weatherDisplayEl.textContent = `It is currently ${degrees} °C in ${weather.name}, ${weather.sys.country}`;
-  }
-}
-
 /* EVENT LISTENERS */
 
 locationInputForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  let temporaryCity = cityInputEl.value;
-  let temporaryCountry = countryInputEl.value;
-  let temporaryState = stateInputEl.value;
-  console.log(temporaryCity, temporaryCountry, temporaryState);
+  const temporaryCity = cityInputEl.value;
+  const temporaryCountry = countryInputEl.value;
+  const temporaryState = stateInputEl.value;
   getWeather(temporaryCity, temporaryCountry, temporaryState);
   cityInputEl.value = "";
   countryInputEl.value = "";
@@ -211,6 +223,7 @@ toggleUnitBtn.addEventListener("click", () => {
 });
 
 saveBtn.addEventListener("click", () => {
+  console.log(currentLocation);
   // Checks if location has been added
   if (
     !document.getElementById(
@@ -218,7 +231,6 @@ saveBtn.addEventListener("click", () => {
     )
   ) {
     // Adds to local storage
-    console.log(currentLocation);
     createLocationBtns(
       currentLocation.city,
       currentLocation.country,
