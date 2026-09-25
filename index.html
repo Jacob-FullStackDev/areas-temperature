@@ -1,36 +1,36 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Areas Temperature</title>
-  <link rel="stylesheet" href="index.css">
-  <script src="index.js" defer></script> 
-</head>
-<div id="main-wrapper">
-  <form id="location-input">
-  <div>
-  <label for="city">Input city</label>
-  <input type="text" name="city" id="city" required />
-  </div>
-  <div>
-  <label for="country">Input country</label>
-  <input type="text" name="country" id="country" required />
-  </div>
-  <div>
-  <label for="state">Input state</label>
-  <input type="text" name="state" id="state" />
-  </div>
-  <button id="fetch-weather-btn" name="fetch-weather-btn" type="submit">Fetch weather</button>
-  </form>
-  <section id="weather-container">
-  <button id="toggle-unit-btn" class="hidden">In fahrenheit</button>
-  <button id="save-location-btn" class="hidden">Save location</button>
-  <header id="weather-display">
-  </header>
-  <section id="saved-locations-btns-container">
-  </section>
-  </section>
-</div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Areas Temperature</title>
+    <link rel="stylesheet" href="index.css" />
+    <script src="index.js" defer></script>
+  </head>
+  <body>
+    <form id="location-input">
+      <div>
+        <label for="city">Input city</label>
+        <input type="text" name="city" id="city" required />
+      </div>
+      <div>
+        <label for="country">Input country</label>
+        <input type="text" name="country" id="country" required />
+      </div>
+      <div>
+        <label for="state">Input state</label>
+        <input type="text" name="state" id="state" />
+      </div>
+      <button id="fetch-weather-btn" name="fetch-weather-btn" type="submit">
+        Fetch weather
+      </button>
+    </form>
+    <section id="weather-container">
+      <button id="toggle-unit-btn" class="hidden">In fahrenheit</button>
+      <button id="save-location-btn" class="hidden">Save location</button>
+      <header id="weather-display"></header>
+      <section id="saved-locations-btns-container"></section>
+      <section id="day-night-color-container"></section>
+    </section>
+  </body>
 </html>
