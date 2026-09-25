@@ -17,7 +17,6 @@ true indicates the tempature should be displayed in °F and will be the default 
 undefined indicates no weather data has been fetched. */
 let weatherData = null;
 let localStorageSupported = true;
-let locationLocalStorageKey = crypto.randomUUID();
 const key = "f604db20a39eb25fb77c35625cd7a41c";
 const currentLocation = {
   city: "",
@@ -25,6 +24,8 @@ const currentLocation = {
   country: "",
   cityWithinState: null,
 };
+const activeLocations = []; // To ensure the saved locations are rendered in the same order upon inital page load
+
 function updateCurrentLocationObject(
   city,
   country,
@@ -169,9 +170,8 @@ function handleStateValue(obj, state) {
   }
 }
 
-function createLocationBtns(city, country, state, id, obj) {
+function createLocationBtns(city, country, state, obj) {
   const savedLocationContainerEl = document.createElement("div");
-  savedLocationContainerEl.id = id;
   const savedLocationBtn = document.createElement("button");
   savedLocationBtn.id = `${city}, ${handleStateValue(obj, state)}${country}`;
   savedLocationBtn.textContent = `Fetch ${city}, ${handleStateValue(obj, state)}${country}`;
@@ -190,10 +190,14 @@ function createLocationBtns(city, country, state, id, obj) {
 }
 
 /* CREATE SAVED LOCATION BUTTONS FROM LOCALSTORAGE */
-
+console.log(JSON.parse(localStorage["Active locations"]));
 if (localStorage.length > 0) {
-  for (const key of Object.keys(localStorage)) {
-    const savedLocation = JSON.parse(localStorage.getItem(key));
+  for (
+    let i = 0;
+    i < JSON.parse(localStorage["Active locations"]).length;
+    i++
+  ) {
+    const savedLocation = JSON.parse(localStorage["Active locations"])[i];
     const savedLocationCity = savedLocation.city;
     const savedLocationCountry = savedLocation.country;
     const savedLocationState = savedLocation.state;
@@ -201,7 +205,6 @@ if (localStorage.length > 0) {
       savedLocationCity,
       savedLocationCountry,
       savedLocationState,
-      key,
       savedLocation,
     );
   }
@@ -236,15 +239,12 @@ saveBtn.addEventListener("click", () => {
       currentLocation.city,
       currentLocation.country,
       currentLocation.state,
-      locationLocalStorageKey,
       currentLocation,
     );
     // Adds to local storage
-    localStorage.setItem(
-      locationLocalStorageKey,
-      JSON.stringify(currentLocation),
-    );
-    locationLocalStorageKey = crypto.randomUUID(); // Generates new random key for localStorage
+    activeLocations.push({ ...currentLocation });
+    localStorage.setItem("Active locations", JSON.stringify(activeLocations));
+    console.log(activeLocations, localStorage);
   } else {
     console.warn("Location already added");
   }
