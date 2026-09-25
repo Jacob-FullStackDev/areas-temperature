@@ -23,9 +23,11 @@ const currentLocation = {
   state: "",
   country: "",
   cityWithinState: null,
+  id: "",
 };
-const activeLocations =
-  localStorage.length > 0 ? JSON.parse(localStorage["Active locations"]) : []; // To ensure the saved locations are rendered in the same order upon inital page load
+const activeLocations = localStorage["Active locations"]
+  ? JSON.parse(localStorage["Active locations"])
+  : []; // To ensure the saved locations are rendered in the same order upon inital page load
 
 function handleStateValue(obj, state) {
   switch (obj.cityWithinState) {
@@ -44,7 +46,6 @@ function updateCurrentLocationObject(
   state = "",
 ) {
   currentLocation.city = city;
-  console.log(currentLocation.city);
   currentLocation.country = country;
   currentLocation.cityWithinState = cityWithinStateRes;
   currentLocation.state = state;
@@ -167,8 +168,11 @@ function utilizeLocationBtns(
     getWeather(city, country, state);
   });
   removeSavedLocationBtn.addEventListener("click", () => {
-    const removedLocation = activeLocations.find(item);
-    localStorage.removeItem(locationContainerEl.id);
+    const removedLocationIdx = activeLocations.findIndex(
+      ({ id }) => id === "Denver, CO, US",
+    );
+    activeLocations.splice(removedLocationIdx, 1);
+    localStorage.setItem("Active locations", activeLocations);
     locationContainerEl.remove();
   });
 }
@@ -178,6 +182,7 @@ function createLocationBtns(city, country, state, obj) {
   const savedLocationBtn = document.createElement("button");
   savedLocationBtn.id = `${city}, ${handleStateValue(obj, state)}${country}`;
   savedLocationBtn.textContent = `Fetch ${city}, ${handleStateValue(obj, state)}${country}`;
+  currentLocation.id = savedLocationBtn.id;
   const removeSavedLocationBtn = document.createElement("button");
   removeSavedLocationBtn.textContent = "Delete location";
   savedLocationContainerEl.append(savedLocationBtn, removeSavedLocationBtn);
@@ -193,7 +198,7 @@ function createLocationBtns(city, country, state, obj) {
 }
 
 /* CREATE SAVED LOCATION BUTTONS FROM LOCALSTORAGE */
-if (localStorage.length > 0) {
+if (localStorage["Active locations"]) {
   for (
     let i = 0;
     i < JSON.parse(localStorage["Active locations"]).length;
