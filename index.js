@@ -144,7 +144,7 @@ async function getWeather(city, country, state) {
   toggleUnitBtn.classList.remove("hidden");
   saveBtn.classList.remove("hidden");
   if (
-    !currentLocation.cityWithinState ||
+    !currentLocation.cityWithinState &&
     currentLocation.cityWithinState !== "N/A"
   ) {
     console.warn(
