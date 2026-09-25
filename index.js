@@ -24,7 +24,18 @@ const currentLocation = {
   country: "",
   cityWithinState: null,
 };
-const activeLocations = []; // To ensure the saved locations are rendered in the same order upon inital page load
+const activeLocations =
+  localStorage.length > 0 ? JSON.parse(localStorage["Active locations"]) : []; // To ensure the saved locations are rendered in the same order upon inital page load
+
+function handleStateValue(obj, state) {
+  switch (obj.cityWithinState) {
+    case "":
+    case "N/A":
+      return "";
+    case true:
+      return `${state}, `;
+  }
+}
 
 function updateCurrentLocationObject(
   city,
@@ -33,6 +44,7 @@ function updateCurrentLocationObject(
   state = "",
 ) {
   currentLocation.city = city;
+  console.log(currentLocation.city);
   currentLocation.country = country;
   currentLocation.cityWithinState = cityWithinStateRes;
   currentLocation.state = state;
@@ -155,19 +167,10 @@ function utilizeLocationBtns(
     getWeather(city, country, state);
   });
   removeSavedLocationBtn.addEventListener("click", () => {
+    const removedLocation = activeLocations.find(item);
     localStorage.removeItem(locationContainerEl.id);
     locationContainerEl.remove();
   });
-}
-
-function handleStateValue(obj, state) {
-  switch (obj.cityWithinState) {
-    case "":
-    case "N/A":
-      return "";
-    case true:
-      return `${state}, `;
-  }
 }
 
 function createLocationBtns(city, country, state, obj) {
@@ -190,7 +193,6 @@ function createLocationBtns(city, country, state, obj) {
 }
 
 /* CREATE SAVED LOCATION BUTTONS FROM LOCALSTORAGE */
-console.log(JSON.parse(localStorage["Active locations"]));
 if (localStorage.length > 0) {
   for (
     let i = 0;
@@ -244,7 +246,6 @@ saveBtn.addEventListener("click", () => {
     // Adds to local storage
     activeLocations.push({ ...currentLocation });
     localStorage.setItem("Active locations", JSON.stringify(activeLocations));
-    console.log(activeLocations, localStorage);
   } else {
     console.warn("Location already added");
   }
