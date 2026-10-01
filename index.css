@@ -24,10 +24,15 @@ input[type="text"] {
 #fetch-weather-btn {
   margin-bottom: 10px;
 }
-#day-night-color-container {
-  background-color: lightblue;
+#weather-animation-container {
   height: 20%;
 }
 #weather-container {
   height: 100%;
+}
+.night {
+  background-color: #00040d;
+}
+.day {
+  background-color: #87ceeb;
 }

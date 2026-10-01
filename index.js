@@ -9,7 +9,11 @@ const saveBtn = document.getElementById("save-location-btn");
 const savedLocationsEl = document.getElementById(
   "saved-locations-btns-container",
 ); // Locations container
-
+const weatherAnimationContainer = document.getElementById(
+  "weather-animation-container",
+); /* 
+Changes color based on if it's day or night, shows animation based on weather state i.e rainy, sunny, cloudy, partly cloudy, snowy
+*/
 /* INITIAL STATE */
 
 let unitInF; /* False indicates the tempature should be displayed in °C,
@@ -28,7 +32,6 @@ const currentLocation = {
 const activeLocations = localStorage["Active locations"]
   ? JSON.parse(localStorage["Active locations"])
   : []; // To ensure the saved locations are rendered in the same order upon inital page load
-
 function handleStateValue(obj, state) {
   switch (obj.cityWithinState) {
     case "":
@@ -216,6 +219,46 @@ if (localStorage["Active locations"]) {
     );
   }
 }
+
+/* DAY/NIGHT CYCLE CONTAINER */
+const time = {
+  currentHours: Number(new Date().getHours()),
+  currentMinutes: Number(new Date().getMinutes()),
+  currentSeconds: Number(new Date().getSeconds()),
+};
+const dayNightState = {
+  isDayTime: time.currentHours <= 18 && time.currentHours >= 6 ? true : false,
+  hoursUntilSetInterval:
+    time.currentHours <= 18 && time.currentHours >= 6
+      ? 18 - time.currentHours
+      : 23 - time.currentHours + 7,
+  minutesUntilSetInterval: 60 - time.currentMinutes,
+  secondsUntilSetInterval: 60 - time.currentSeconds,
+  calculateFinalMSDuration: function () {
+    return (
+      this.hoursUntilSetInterval * 3_600_000 +
+      this.minutesUntilSetInterval * 60_000 +
+      this.secondsUntilSetInterval * 1_000
+    );
+  },
+};
+
+function setDayOrNight(addClass, removeClass) {
+  weatherAnimationContainer.classList.add(addClass);
+  weatherAnimationContainer.classList.remove(removeClass);
+}
+
+function toggleDayOrNight() {
+  if (dayNightState.isDayTime) {
+    setDayOrNight("day", "night");
+  } else {
+    setDayOrNight("night", "day");
+  }
+}
+
+const interval = setInterval(() => {
+  toggleDayOrNight();
+}, dayNightState.calculateFinalMSDuration());
 
 /* EVENT LISTENERS */
 
