@@ -18,7 +18,6 @@ true indicates the tempature should be displayed in °F and will be the default 
 undefined indicates no weather data has been fetched. */
 let weatherData = null;
 let localStorageSupported = true;
-const key = "f604db20a39eb25fb77c35625cd7a41c";
 const currentLocation = {
   city: "",
   state: "",
@@ -97,7 +96,7 @@ async function checkState(city, country, state) {
   if (state !== "") {
     // Checks if there is not a city present in that state
     await fetch(
-      `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=${key}`,
+      `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=f604db20a39eb25fb77c35625cd7a41c`,
     )
       .then((res) => {
         return res.json();
@@ -128,9 +127,9 @@ async function getWeather(city, country, state) {
   checkState(city, country, state);
   let url;
   if (state !== "") {
-    url = `https://api.openweathermap.org/data/2.5/weather?q=${city},${state},${country}&appid=${key}`;
+    url = `https://api.openweathermap.org/data/2.5/weather?q=${city},${state},${country}&appid=f604db20a39eb25fb77c35625cd7a41c`;
   } else {
-    url = `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=${key}`;
+    url = `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=f604db20a39eb25fb77c35625cd7a41c`;
   }
   await fetch(url, { mode: `cors` })
     .then((response) => {
