@@ -43,6 +43,7 @@ function updateCurrentLocationObject(city, country, cityWithinStateRes, state) {
   currentLocation.country = country;
   currentLocation.cityWithinState = cityWithinStateRes;
   currentLocation.state = state;
+  saveBtn.disabled = false;
 }
 
 /* LOCAL STORAGE */
@@ -87,7 +88,6 @@ function displayWeather(weather) {
 
 async function checkState(city, country, state) {
   let cityWithinState;
-  console.log(state, "checkState");
   if (state !== "") {
     // Checks if there is no city present within that state
     await fetch(
@@ -283,9 +283,7 @@ toggleUnitBtn.addEventListener("click", () => {
 
 saveBtn.addEventListener("click", () => {
   // Checks if location has been added
-  console.log(
-    `${currentLocation.city}, ${handleStateValue(currentLocation, currentLocation.state)}${currentLocation.country}`,
-  );
+  saveBtn.disabled = true;
   if (
     !document.getElementById(
       `${currentLocation.city}, ${handleStateValue(currentLocation, currentLocation.state)}${currentLocation.country}`,
