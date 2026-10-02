@@ -296,7 +296,7 @@ saveBtn.addEventListener("click", () => {
       currentLocation,
     );
     // Adds to local storage
-    activeLocations.push(currentLocation);
+    activeLocations.push({ ...currentLocation });
     localStorage.setItem("Active locations", JSON.stringify(activeLocations));
   } else {
     console.warn("Location already added");
