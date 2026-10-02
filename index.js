@@ -31,25 +31,18 @@ const activeLocations = localStorage["Active locations"]
   : [];
 function handleStateValue(obj, state) {
   switch (obj.cityWithinState) {
-    case "":
-    case "N/A":
-      return "";
     case true:
       return `${state}, `;
+    default:
+      return "";
   }
 }
 
-function updateCurrentLocationObject(
-  city,
-  country,
-  cityWithinStateRes,
-  state = "",
-) {
+function updateCurrentLocationObject(city, country, cityWithinStateRes, state) {
   currentLocation.city = city;
   currentLocation.country = country;
   currentLocation.cityWithinState = cityWithinStateRes;
   currentLocation.state = state;
-  currentLocation.id = `${city}, ${handleStateValue(currentLocation, state)}${country}`;
 }
 
 /* LOCAL STORAGE */
@@ -94,6 +87,7 @@ function displayWeather(weather) {
 
 async function checkState(city, country, state) {
   let cityWithinState;
+  console.log(state, "checkState");
   if (state !== "") {
     // Checks if there is no city present within that state
     await fetch(
@@ -115,8 +109,11 @@ async function checkState(city, country, state) {
       });
     if (cityWithinState) {
       updateCurrentLocationObject(city, country, true, state);
+      currentLocation.id = `${city}, ${handleStateValue(currentLocation, state)}${country}`;
     } else {
-      updateCurrentLocationObject(city, country, false);
+      console.warn(
+        `There is no ${city} within ${state}. The area's temperature can not be obtained. Please either remove the state code (for the largest ${city} in ${country}) or remove the state code when you submit the location form next.`,
+      );
     }
   } else {
     updateCurrentLocationObject(city, country, "N/A"); // No state provided
@@ -287,11 +284,11 @@ toggleUnitBtn.addEventListener("click", () => {
 saveBtn.addEventListener("click", () => {
   // Checks if location has been added
   console.log(
-    `${currentLocation.city}, ${handleStateValue(state, currentLocation)}${currentLocation.country}`,
+    `${currentLocation.city}, ${handleStateValue(currentLocation, currentLocation.state)}${currentLocation.country}`,
   );
   if (
     !document.getElementById(
-      `${currentLocation.city}, ${handleStateValue(state, currentLocation)}${currentLocation.country}`,
+      `${currentLocation.city}, ${handleStateValue(currentLocation, currentLocation.state)}${currentLocation.country}`,
     )
   ) {
     createLocationBtns(
