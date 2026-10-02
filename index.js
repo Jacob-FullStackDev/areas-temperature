@@ -13,9 +13,9 @@ const dayNightContainer = document.getElementById("day-night-container"); // Cha
 
 /* INITIAL STATE */
 
-let unitInF; /* False indicates the tempature should be displayed in °C,
+let unitInF = null; /* False indicates the tempature should be displayed in °C,
 true indicates the tempature should be displayed in °F and will be the default value after the first fetch,
-undefined indicates no weather data has been fetched. */
+null indicates no weather data has been fetched. */
 let weatherData = null;
 let localStorageSupported = true;
 const currentLocation = {
@@ -28,7 +28,7 @@ const currentLocation = {
 
 const activeLocations = localStorage["Active locations"]
   ? JSON.parse(localStorage["Active locations"])
-  : []; // To ensure the saved locations are rendered in the same order upon inital page load
+  : [];
 function handleStateValue(obj, state) {
   switch (obj.cityWithinState) {
     case "":
@@ -49,6 +49,7 @@ function updateCurrentLocationObject(
   currentLocation.country = country;
   currentLocation.cityWithinState = cityWithinStateRes;
   currentLocation.state = state;
+  currentLocation.id = `${city}, ${handleStateValue(currentLocation, state)}${country}`;
 }
 
 /* LOCAL STORAGE */
@@ -75,16 +76,16 @@ if (!storageAvailable()) {
     "Local storage is unsupported, saved locations will be cleared after you exit or refresh the page",
   );
 }
-/* GET WEATHER DATA */
 
-// Displays weather and handles tempature units
+/* GET WEATHER DATA */
+// Displays weather and handles unit conversion
 function displayWeather(weather) {
   let degrees; // API call returns temperature in kelvin
   if (!unitInF) {
     toggleUnitBtn.textContent = "In fahrenheit";
     degrees = Math.round(((weather.main.temp - 273.15) * 9) / 5 + 32);
     weatherDisplayEl.textContent = `It is currently ${degrees} °F in ${weather.name}, ${weather.sys.country}`;
-  } else if (unitInF) {
+  } else {
     toggleUnitBtn.textContent = "In celsius";
     degrees = Math.round(weather.main.temp - 273.15);
     weatherDisplayEl.textContent = `It is currently ${degrees} °C in ${weather.name}, ${weather.sys.country}`;
@@ -94,7 +95,7 @@ function displayWeather(weather) {
 async function checkState(city, country, state) {
   let cityWithinState;
   if (state !== "") {
-    // Checks if there is not a city present in that state
+    // Checks if there is no city present within that state
     await fetch(
       `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=f604db20a39eb25fb77c35625cd7a41c`,
     )
@@ -126,7 +127,10 @@ async function checkState(city, country, state) {
 async function getWeather(city, country, state) {
   checkState(city, country, state);
   let url;
-  if (state !== "") {
+  if (
+    currentLocation.cityWithinState ||
+    currentLocation.cityWithinState !== "N/A"
+  ) {
     url = `https://api.openweathermap.org/data/2.5/weather?q=${city},${state},${country}&appid=f604db20a39eb25fb77c35625cd7a41c`;
   } else {
     url = `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=f604db20a39eb25fb77c35625cd7a41c`;
@@ -167,11 +171,14 @@ function utilizeLocationBtns(
   savedLocationBtn.addEventListener("click", () => {
     getWeather(city, country, state);
   });
-  removeSavedLocationBtn.addEventListener("click", () => {
+  removeSavedLocationBtn.addEventListener("click", (e) => {
     const removedLocationIdx = activeLocations.findIndex(
-      ({ id }) => id === "Denver, CO, US",
+      (location) => e.parent.id,
     );
+    console.log("ACTIVE LOCATIONS BEFORE MUTATION", activeLocations);
+    console.log("FOUND ITEM", activeLocations[removedLocationIdx]);
     activeLocations.splice(removedLocationIdx, 1);
+    console.log("ACTIVE LOCATIONS AFTER MUTATION", activeLocations);
     localStorage.setItem("Active locations", activeLocations);
     locationContainerEl.remove();
   });
@@ -180,11 +187,11 @@ function utilizeLocationBtns(
 function createLocationBtns(city, country, state, obj) {
   const savedLocationContainerEl = document.createElement("div");
   const savedLocationBtn = document.createElement("button");
-  savedLocationBtn.id = `${city}, ${handleStateValue(obj, state)}${country}`;
+  savedLocationContainerEl.id = `${city}, ${handleStateValue(obj, state)}${country}`;
   savedLocationBtn.textContent = `Fetch ${city}, ${handleStateValue(obj, state)}${country}`;
-  currentLocation.id = savedLocationBtn.id;
+  currentLocation.id = savedLocationContainerEl.id;
   const removeSavedLocationBtn = document.createElement("button");
-  removeSavedLocationBtn.textContent = "Delete location";
+  removeSavedLocationBtn.textContent = "Remove location";
   savedLocationContainerEl.append(savedLocationBtn, removeSavedLocationBtn);
   savedLocationsEl.append(savedLocationContainerEl);
   utilizeLocationBtns(
@@ -198,6 +205,7 @@ function createLocationBtns(city, country, state, obj) {
 }
 
 /* CREATE SAVED LOCATION BUTTONS FROM LOCALSTORAGE */
+
 if (localStorage["Active locations"]) {
   for (
     let i = 0;
@@ -218,6 +226,7 @@ if (localStorage["Active locations"]) {
 }
 
 /* DAY/NIGHT CYCLE CONTAINER */
+
 const time = {
   currentHours: Number(new Date().getHours()),
   currentMinutes: Number(new Date().getMinutes()),
@@ -228,7 +237,7 @@ const dayNightState = {
   hoursUntilSetInterval:
     time.currentHours <= 18 && time.currentHours >= 6
       ? 18 - time.currentHours
-      : 23 - time.currentHours + 7,
+      : 30 - time.currentHours,
   minutesUntilSetInterval: 60 - time.currentMinutes,
   secondsUntilSetInterval: 60 - time.currentSeconds,
   calculateFinalMSDuration: function () {
@@ -259,8 +268,8 @@ const interval = setInterval(() => {
 
 /* EVENT LISTENERS */
 
-locationInputForm.addEventListener("submit", (event) => {
-  event.preventDefault();
+locationInputForm.addEventListener("submit", (e) => {
+  e.preventDefault();
   const temporaryCity = cityInputEl.value;
   const temporaryCountry = countryInputEl.value;
   const temporaryState = stateInputEl.value;
@@ -277,9 +286,12 @@ toggleUnitBtn.addEventListener("click", () => {
 
 saveBtn.addEventListener("click", () => {
   // Checks if location has been added
+  console.log(
+    `${currentLocation.city}, ${handleStateValue(state, currentLocation)}${currentLocation.country}`,
+  );
   if (
     !document.getElementById(
-      `${currentLocation.city}, ${handleStateValue(state)}${currentLocation.country}`,
+      `${currentLocation.city}, ${handleStateValue(state, currentLocation)}${currentLocation.country}`,
     )
   ) {
     createLocationBtns(
@@ -289,7 +301,7 @@ saveBtn.addEventListener("click", () => {
       currentLocation,
     );
     // Adds to local storage
-    activeLocations.push({ ...currentLocation });
+    activeLocations.push(currentLocation);
     localStorage.setItem("Active locations", JSON.stringify(activeLocations));
   } else {
     console.warn("Location already added");
