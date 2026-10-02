@@ -169,14 +169,12 @@ function utilizeLocationBtns(
     getWeather(city, country, state);
   });
   removeSavedLocationBtn.addEventListener("click", (e) => {
+    console.log(e.target.parentElement.id);
     const removedLocationIdx = activeLocations.findIndex(
-      (location) => e.parent.id,
+      ({ id }) => id === e.target.parentElement.id,
     );
-    console.log("ACTIVE LOCATIONS BEFORE MUTATION", activeLocations);
-    console.log("FOUND ITEM", activeLocations[removedLocationIdx]);
     activeLocations.splice(removedLocationIdx, 1);
-    console.log("ACTIVE LOCATIONS AFTER MUTATION", activeLocations);
-    localStorage.setItem("Active locations", activeLocations);
+    localStorage.setItem("Active locations", JSON.stringify(activeLocations));
     locationContainerEl.remove();
   });
 }
