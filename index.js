@@ -9,11 +9,8 @@ const saveBtn = document.getElementById("save-location-btn");
 const savedLocationsEl = document.getElementById(
   "saved-locations-btns-container",
 ); // Locations container
-const weatherAnimationContainer = document.getElementById(
-  "weather-animation-container",
-); /* 
-Changes color based on if it's day or night, shows animation based on weather state i.e rainy, sunny, cloudy, partly cloudy, snowy
-*/
+const dayNightContainer = document.getElementById("day-night-container"); // Changes color based on if it's day or night
+
 /* INITIAL STATE */
 
 let unitInF; /* False indicates the tempature should be displayed in °C,
@@ -29,6 +26,7 @@ const currentLocation = {
   cityWithinState: null,
   id: "",
 };
+
 const activeLocations = localStorage["Active locations"]
   ? JSON.parse(localStorage["Active locations"])
   : []; // To ensure the saved locations are rendered in the same order upon inital page load
@@ -244,8 +242,8 @@ const dayNightState = {
 };
 
 function setDayOrNight(addClass, removeClass) {
-  weatherAnimationContainer.classList.add(addClass);
-  weatherAnimationContainer.classList.remove(removeClass);
+  dayNightContainer.classList.add(addClass);
+  dayNightContainer.classList.remove(removeClass);
 }
 
 function toggleDayOrNight() {

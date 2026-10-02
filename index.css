@@ -27,7 +27,7 @@ input[type="text"] {
 #weather-animation-container {
   height: 20%;
 }
-#weather-container {
+#day-night-container {
   height: 100%;
 }
 .night {
