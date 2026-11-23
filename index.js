@@ -90,29 +90,32 @@ function displayWeather(weather) {
   }
 }
 
-async function checkState(city, country, state) {
+async function checkStateIsValid(city, country, state, placeholder) {
+  await fetch(
+    `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=f604db20a39eb25fb77c35625cd7a41c`,
+  )
+    .then((res) => {
+      return res.json();
+    })
+    .then((location) => {
+      if (!location[0]) {
+        // No city matching name in state
+        cityWithinStateRes = false;
+      } else {
+        cityWithinStateRes = true;
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+}
+
+function handleState(city, country, state) {
   let cityWithinStateRes = "N/A";
   if (state !== "") {
-    // Checks if there is no city present within that state
-    await fetch(
-      `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=f604db20a39eb25fb77c35625cd7a41c`,
-    )
-      .then((res) => {
-        return res.json();
-      })
-      .then((location) => {
-        if (!location[0]) {
-          // No city matching name in state
-          cityWithinStateRes = false;
-        } else {
-          cityWithinStateRes = true;
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    // Checks if there is a city present within that state
+    checkStateIsValid(city, country, state, cityWithinStateRes);
     updateCurrentLocationObject(city, country, state);
-    console.log(cityWithinStateRes);
     if (cityWithinStateRes && cityWithinStateRes !== "N/A") {
       updateCurrentLocationObject(city, country, state, true);
       currentLocation.id = `${city}, ${handleStateValue(currentLocation, state)}${country}`;
@@ -128,7 +131,7 @@ async function checkState(city, country, state) {
 
 // Fetches weather from open weather map API
 async function getWeather(city, country, state) {
-  checkState(city, country, state);
+  handleState(city, country, state);
   let url;
   if (
     currentLocation.cityWithinState ||
@@ -151,14 +154,6 @@ async function getWeather(city, country, state) {
   toggleUnitBtn.classList.remove("hidden");
   saveBtn.classList.remove("hidden");
   saveBtn.disabled = false;
-  // if (
-  //   !currentLocation.cityWithinState &&
-  //   currentLocation.cityWithinState !== "N/A"
-  // ) {
-  //   console.warn(
-  //     `There is no ${city} within ${state}, displaying results for the largest city named ${city} within the ${country} instead. Saving this location will also get the temperature for the largest city.`,
-  //   );
-  // }
 }
 
 /* CREATE SAVED LOCATION BUTTONS */
@@ -176,7 +171,6 @@ function utilizeLocationBtns(
     getWeather(city, country, state);
   });
   removeSavedLocationBtn.addEventListener("click", (e) => {
-    console.log(e.target.parentElement.id);
     const removedLocationIdx = activeLocations.findIndex(
       ({ id }) => id === e.target.parentElement.id,
     );
