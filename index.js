@@ -38,12 +38,16 @@ function handleStateValue(obj, state) {
   }
 }
 
-function updateCurrentLocationObject(city, country, cityWithinStateRes, state) {
+function updateCurrentLocationObject(
+  city,
+  country,
+  state = "",
+  cityWithinStateRes = "N/A",
+) {
   currentLocation.city = city;
   currentLocation.country = country;
   currentLocation.cityWithinState = cityWithinStateRes;
   currentLocation.state = state;
-  saveBtn.disabled = false;
 }
 
 /* LOCAL STORAGE */
@@ -87,7 +91,7 @@ function displayWeather(weather) {
 }
 
 async function checkState(city, country, state) {
-  let cityWithinState;
+  let cityWithinStateRes = "N/A";
   if (state !== "") {
     // Checks if there is no city present within that state
     await fetch(
@@ -99,24 +103,26 @@ async function checkState(city, country, state) {
       .then((location) => {
         if (!location[0]) {
           // No city matching name in state
-          cityWithinState = false;
+          cityWithinStateRes = false;
         } else {
-          cityWithinState = true;
+          cityWithinStateRes = true;
         }
       })
       .catch((err) => {
         console.error(err);
       });
-    if (cityWithinState) {
-      updateCurrentLocationObject(city, country, true, state);
+    updateCurrentLocationObject(city, country, state);
+    console.log(cityWithinStateRes);
+    if (cityWithinStateRes && cityWithinStateRes !== "N/A") {
+      updateCurrentLocationObject(city, country, state, true);
       currentLocation.id = `${city}, ${handleStateValue(currentLocation, state)}${country}`;
-    } else {
+    } else if (!cityWithinStateRes) {
       console.warn(
-        `There is no ${city} within ${state}. The area's temperature can not be obtained. Please either remove the state code (for the largest ${city} in ${country}) or remove the state code when you submit the location form next.`,
+        `There is no ${city} within ${state}, displaying results for the largest city named ${city} within the ${country} instead. Saving this location will also get the temperature for the largest city.`,
       );
     }
   } else {
-    updateCurrentLocationObject(city, country, "N/A"); // No state provided
+    updateCurrentLocationObject(city, country); // No state provided
   }
 }
 
@@ -144,14 +150,15 @@ async function getWeather(city, country, state) {
   // Makes toggle unit and save location buttons available after inital fetch
   toggleUnitBtn.classList.remove("hidden");
   saveBtn.classList.remove("hidden");
-  if (
-    !currentLocation.cityWithinState &&
-    currentLocation.cityWithinState !== "N/A"
-  ) {
-    console.warn(
-      `There is no ${city} within ${state}, displaying results for the largest city named ${city} within the ${country} instead. Saving this location will also get the temperature for the largest city.`,
-    );
-  }
+  saveBtn.disabled = false;
+  // if (
+  //   !currentLocation.cityWithinState &&
+  //   currentLocation.cityWithinState !== "N/A"
+  // ) {
+  //   console.warn(
+  //     `There is no ${city} within ${state}, displaying results for the largest city named ${city} within the ${country} instead. Saving this location will also get the temperature for the largest city.`,
+  //   );
+  // }
 }
 
 /* CREATE SAVED LOCATION BUTTONS */
