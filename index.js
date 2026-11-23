@@ -247,16 +247,16 @@ const dayNightState = {
   },
 };
 
-function setDayOrNight(addClass, removeClass) {
+function toggleClasses(addClass, removeClass) {
   dayNightContainer.classList.add(addClass);
   dayNightContainer.classList.remove(removeClass);
 }
 
 function toggleDayOrNight() {
   if (dayNightState.isDayTime) {
-    setDayOrNight("day", "night");
+    toggleClasses("day", "night");
   } else {
-    setDayOrNight("night", "day");
+    toggleClasses("night", "day");
   }
 }
 
