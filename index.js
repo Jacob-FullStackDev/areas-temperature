@@ -90,7 +90,8 @@ function displayWeather(weather) {
   }
 }
 
-async function checkStateIsValid(city, country, state, placeholder) {
+async function checkStateIsValid(city, country, state) {
+  let placeholder = "N/A";
   await fetch(
     `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=f604db20a39eb25fb77c35625cd7a41c`,
   )
@@ -100,26 +101,27 @@ async function checkStateIsValid(city, country, state, placeholder) {
     .then((location) => {
       if (!location[0]) {
         // No city matching name in state
-        cityWithinStateRes = false;
+        placeholder = false;
       } else {
-        cityWithinStateRes = true;
+        placeholder = true;
       }
     })
     .catch((err) => {
       console.error(err);
     });
+  return placeholder;
 }
 
 function handleState(city, country, state) {
-  let cityWithinStateRes = "N/A";
   if (state !== "") {
+    let res = checkStateIsValid(city, country, state);
     // Checks if there is a city present within that state
-    checkStateIsValid(city, country, state, cityWithinStateRes);
+    checkStateIsValid(city, country, state, res);
     updateCurrentLocationObject(city, country, state);
-    if (cityWithinStateRes && cityWithinStateRes !== "N/A") {
+    if (res && res !== "N/A") {
       updateCurrentLocationObject(city, country, state, true);
       currentLocation.id = `${city}, ${handleStateValue(currentLocation, state)}${country}`;
-    } else if (!cityWithinStateRes) {
+    } else if (!res) {
       console.warn(
         `There is no ${city} within ${state}, displaying results for the largest city named ${city} within the ${country} instead. Saving this location will also get the temperature for the largest city.`,
       );
