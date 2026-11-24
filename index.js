@@ -239,16 +239,16 @@ const dayNightState = {
   },
 };
 
-function toggleClasses(addClass, removeClass) {
-  dayNightContainer.classList.add(addClass);
-  dayNightContainer.classList.remove(removeClass);
+function toggleClasses(el, addClass, removeClass) {
+  el.classList.add(addClass);
+  el.classList.remove(removeClass);
 }
 
 function toggleDayOrNight() {
   if (dayNightState.isDayTime) {
-    toggleClasses("day", "night");
+    toggleClasses(dayNightContainer, "day", "night");
   } else {
-    toggleClasses("night", "day");
+    toggleClasses(dayNightContainer, "night", "day");
   }
 }
 
