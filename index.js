@@ -14,8 +14,7 @@ const dayNightContainer = document.getElementById("day-night-container"); // Cha
 /* INITIAL STATE */
 
 let unitInF = null; /* False indicates the tempature should be displayed in °C,
-true indicates the tempature should be displayed in °F and will be the default value after the first fetch,
-null indicates no weather data has been fetched. */
+true indicates the tempature should be displayed in °F and will be the default value after the first fetch */
 let weatherData = null;
 let localStorageSupported = true;
 const currentLocation = {
@@ -68,6 +67,7 @@ function storageAvailable() {
     );
   }
 }
+
 if (!storageAvailable()) {
   localStorageSupported = false;
   console.warn(
@@ -98,7 +98,6 @@ async function getCoords(city, country, state) {
       return res.json();
     })
     .then((location) => {
-      console.log({ lat: location[0].lat, lon: location[0].lon });
       return { lat: location[0].lat, lon: location[0].lon };
     })
     .catch((err) => {
@@ -108,8 +107,8 @@ async function getCoords(city, country, state) {
 
 async function handleState(city, country, state) {
   if (state !== "") {
-    let res = getCoords(city, country, state);
     // Checks if there is a city present within that state
+    let res = getCoords(city, country, state);
     updateCurrentLocationObject(city, country, state);
     if (res && res !== "N/A") {
       updateCurrentLocationObject(city, country, state, true);
@@ -142,7 +141,6 @@ async function getWeather(city, country, state) {
     })
     .then((data) => {
       weatherData = data;
-      console.log(weatherData);
       displayWeather(weatherData);
     })
     .catch((err) => console.error(err));
@@ -262,6 +260,7 @@ const interval = setInterval(() => {
 
 locationInputForm.addEventListener("submit", (e) => {
   e.preventDefault();
+  /* TODO: Update current location object here instead of getWeather */
   const temporaryCity = cityInputEl.value;
   const temporaryCountry = countryInputEl.value;
   const temporaryState = stateInputEl.value;
@@ -273,6 +272,7 @@ locationInputForm.addEventListener("submit", (e) => {
 
 toggleUnitBtn.addEventListener("click", () => {
   unitInF = !unitInF; // Flips to opposite unit
+  /* TODO: handle unit conversion here instead of displayWeather */
   displayWeather(weatherData);
 });
 
@@ -297,3 +297,4 @@ saveBtn.addEventListener("click", () => {
     console.warn("Location already added");
   }
 });
+/* TODO: have `${currentLocation.city}, ${handleStateValue(currentLocation, currentLocation.state)}${currentLocation.country}` returned from a function */
