@@ -90,8 +90,7 @@ function displayWeather(weather) {
   }
 }
 
-async function checkStateIsValid(city, country, state) {
-  let placeholder = "N/A";
+async function getCoords(city, country, state) {
   await fetch(
     `http://api.openweathermap.org/geo/1.0/direct?q=${city},${state},${country}&appid=f604db20a39eb25fb77c35625cd7a41c`,
   )
@@ -99,31 +98,25 @@ async function checkStateIsValid(city, country, state) {
       return res.json();
     })
     .then((location) => {
-      if (!location[0]) {
-        // No city matching name in state
-        placeholder = false;
-      } else {
-        placeholder = true;
-      }
+      console.log({ lat: location[0].lat, lon: location[0].lon });
+      return { lat: location[0].lat, lon: location[0].lon };
     })
     .catch((err) => {
       console.error(err);
     });
-  return placeholder;
 }
 
-function handleState(city, country, state) {
+async function handleState(city, country, state) {
   if (state !== "") {
-    let res = checkStateIsValid(city, country, state);
+    let res = getCoords(city, country, state);
     // Checks if there is a city present within that state
-    checkStateIsValid(city, country, state, res);
     updateCurrentLocationObject(city, country, state);
     if (res && res !== "N/A") {
       updateCurrentLocationObject(city, country, state, true);
       currentLocation.id = `${city}, ${handleStateValue(currentLocation, state)}${country}`;
     } else if (!res) {
-      console.warn(
-        `There is no ${city} within ${state}, displaying results for the largest city named ${city} within the ${country} instead. Saving this location will also get the temperature for the largest city.`,
+      console.error(
+        `There is no ${city} within ${state}. Please either enter the correct state code or don't enter a state code.`,
       );
     }
   } else {
@@ -149,6 +142,7 @@ async function getWeather(city, country, state) {
     })
     .then((data) => {
       weatherData = data;
+      console.log(weatherData);
       displayWeather(weatherData);
     })
     .catch((err) => console.error(err));
