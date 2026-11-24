@@ -28,12 +28,12 @@ const currentLocation = {
 const activeLocations = localStorage["Active locations"]
   ? JSON.parse(localStorage["Active locations"])
   : [];
+
 function handleStateValue(obj, state) {
-  switch (obj.cityWithinState) {
-    case true:
-      return `${state}, `;
-    default:
-      return "";
+  if (obj.cityWithinState) {
+    return `${state}, `;
+  } else {
+    return "";
   }
 }
 
