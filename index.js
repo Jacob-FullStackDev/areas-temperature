@@ -134,6 +134,13 @@ function setURL() {
     return `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=f604db20a39eb25fb77c35625cd7a41c`;
   }
 }
+
+function toggleSaveLocationControls() {
+  // Makes toggle unit and save location buttons available after inital fetch
+  toggleUnitBtn.classList.remove("hidden");
+  saveBtn.classList.remove("hidden");
+  saveBtn.disabled = false;
+}
 async function getWeather(city, country, state) {
   const url = setURL();
   handleState(city, country, state);
@@ -146,10 +153,7 @@ async function getWeather(city, country, state) {
       displayWeather(weatherData);
     })
     .catch((err) => console.error(err));
-  // Makes toggle unit and save location buttons available after inital fetch
-  toggleUnitBtn.classList.remove("hidden");
-  saveBtn.classList.remove("hidden");
-  saveBtn.disabled = false;
+  toggleSaveLocationControls();
 }
 
 /* CREATE SAVED LOCATION BUTTONS */
