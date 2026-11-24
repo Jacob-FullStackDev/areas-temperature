@@ -124,17 +124,19 @@ async function handleState(city, country, state) {
 }
 
 // Fetches weather from open weather map API
-async function getWeather(city, country, state) {
-  handleState(city, country, state);
-  let url;
+function setURL() {
   if (
     currentLocation.cityWithinState ||
     currentLocation.cityWithinState !== "N/A"
   ) {
-    url = `https://api.openweathermap.org/data/2.5/weather?q=${city},${state},${country}&appid=f604db20a39eb25fb77c35625cd7a41c`;
+    return `https://api.openweathermap.org/data/2.5/weather?q=${city},${state},${country}&appid=f604db20a39eb25fb77c35625cd7a41c`;
   } else {
-    url = `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=f604db20a39eb25fb77c35625cd7a41c`;
+    return `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=f604db20a39eb25fb77c35625cd7a41c`;
   }
+}
+async function getWeather(city, country, state) {
+  const url = setURL();
+  handleState(city, country, state);
   await fetch(url, { mode: `cors` })
     .then((response) => {
       return response.json();
