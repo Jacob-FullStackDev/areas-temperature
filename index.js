@@ -41,7 +41,7 @@ function updateCurrentLocationObject(
   city,
   country,
   state = "",
-  cityWithinStateRes = "N/A",
+  cityWithinStateRes,
 ) {
   currentLocation.city = city;
   currentLocation.country = country;
@@ -109,7 +109,6 @@ async function handleState(city, country, state) {
   if (state !== "") {
     // Checks if there is a city present within that state
     let res = getCoords(city, country, state);
-    updateCurrentLocationObject(city, country, state);
     if (res && res !== "N/A") {
       updateCurrentLocationObject(city, country, state, true);
       currentLocation.id = `${city}, ${handleStateValue(currentLocation, state)}${country}`;
@@ -123,8 +122,7 @@ async function handleState(city, country, state) {
   }
 }
 
-// Fetches weather from open weather map API
-function setURL() {
+function setURL(city, country, state) {
   if (
     currentLocation.cityWithinState ||
     currentLocation.cityWithinState !== "N/A"
@@ -141,9 +139,11 @@ function toggleSaveLocationControls() {
   saveBtn.classList.remove("hidden");
   saveBtn.disabled = false;
 }
+
+// Fetches weather from open weather map API
 async function getWeather(city, country, state) {
-  const url = setURL();
   handleState(city, country, state);
+  const url = setURL(city, country, state);
   await fetch(url, { mode: `cors` })
     .then((response) => {
       return response.json();
