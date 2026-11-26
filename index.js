@@ -83,7 +83,7 @@ function displayWeather(temperature, isInF = true) {
   const fahrenheitFormula = ((temperature.main.temp - 273.15) * 9) / 5 + 32;
   const unit = isInF ? "°C" : "°F";
   toggleUnitBtn.textContent = `In ${unit}`;
-  weatherDisplayEl.textContent = `It is currently ${isInF ? celsiusFormula : fahrenheitFormula} ${unit} in ${temperature.name}, ${temperature.sys.country}`;
+  weatherDisplayEl.textContent = `It is currently ${isInF ? Math.round(celsiusFormula) : Math.round(fahrenheitFormula)} ${unit} in ${temperature.name}, ${temperature.sys.country}`;
 }
 
 function handleToggleUnit(temperature) {
