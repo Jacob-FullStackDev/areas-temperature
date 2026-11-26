@@ -266,14 +266,13 @@ const interval = setInterval(() => {
 
 locationInputForm.addEventListener("submit", (e) => {
   e.preventDefault();
-  /* TODO: Update current location object here instead of getWeather */
-  const temporaryCity = cityInputEl.value;
-  const temporaryCountry = countryInputEl.value;
-  const temporaryState = stateInputEl.value;
-  getWeather(temporaryCity, temporaryCountry, temporaryState);
+  const tempCity = cityInputEl.value;
+  const tempCountry = countryInputEl.value;
+  const tempState = stateInputEl.value;
   cityInputEl.value = "";
   countryInputEl.value = "";
   stateInputEl.value = "";
+  getWeather(tempCity, tempCountry, tempState);
 });
 
 toggleUnitBtn.addEventListener("click", () => {
