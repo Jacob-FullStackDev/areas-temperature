@@ -24,7 +24,10 @@ const currentLocation = {
   cityWithinState: null,
   id: "",
 };
-
+function returnLocation(obj = currentLocation, state = currentLocation.state) {
+  console.log(obj, state, "returnLocation");
+  return `${obj.city}, ${handleStateValue(obj, state)}${obj.country}`;
+}
 const activeLocations = localStorage["Active locations"]
   ? JSON.parse(localStorage["Active locations"])
   : [];
@@ -45,8 +48,8 @@ function updateCurrentLocationObject(
 ) {
   currentLocation.city = city;
   currentLocation.country = country;
-  currentLocation.cityWithinState = cityWithinStateRes;
   currentLocation.state = state;
+  currentLocation.cityWithinState = cityWithinStateRes;
 }
 
 /* LOCAL STORAGE */
@@ -115,7 +118,7 @@ async function handleState(city, country, state) {
     let res = getCoords(city, country, state);
     if (res && res !== "N/A") {
       updateCurrentLocationObject(city, country, state, true);
-      currentLocation.id = `${city}, ${handleStateValue(currentLocation, state)}${country}`;
+      currentLocation.id = returnLocation();
     } else if (!res) {
       console.error(
         `There is no ${city} within ${state}. Please either enter the correct state code or don't enter a state code.`,
@@ -288,11 +291,7 @@ toggleUnitBtn.addEventListener("click", () => {
 saveBtn.addEventListener("click", () => {
   // Checks if location has been added
   saveBtn.disabled = true;
-  if (
-    !document.getElementById(
-      `${currentLocation.city}, ${handleStateValue(currentLocation, currentLocation.state)}${currentLocation.country}`,
-    )
-  ) {
+  if (!document.getElementById(`${returnLocation()}`)) {
     createLocationBtns(
       currentLocation.city,
       currentLocation.country,
