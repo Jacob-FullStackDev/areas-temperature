@@ -77,16 +77,20 @@ if (!storageAvailable()) {
 
 /* GET WEATHER DATA */
 // Displays weather and handles unit conversion
-function displayWeather(weather) {
-  let degrees; // API call returns temperature in kelvin
+
+function displayWeather(temperature, isInF = true) {
+  const celsiusFormula = temperature.main.temp - 273.15;
+  const fahrenheitFormula = ((temperature.main.temp - 273.15) * 9) / 5 + 32;
+  const unit = isInF ? "°C" : "°F";
+  toggleUnitBtn.textContent = `In ${unit}`;
+  weatherDisplayEl.textContent = `It is currently ${isInF ? celsiusFormula : fahrenheitFormula} ${unit} in ${temperature.name}, ${temperature.sys.country}`;
+}
+
+function handleToggleUnit(temperature) {
   if (!unitInF) {
-    toggleUnitBtn.textContent = "In fahrenheit";
-    degrees = Math.round(((weather.main.temp - 273.15) * 9) / 5 + 32);
-    weatherDisplayEl.textContent = `It is currently ${degrees} °F in ${weather.name}, ${weather.sys.country}`;
+    displayWeather(temperature, true);
   } else {
-    toggleUnitBtn.textContent = "In celsius";
-    degrees = Math.round(weather.main.temp - 273.15);
-    weatherDisplayEl.textContent = `It is currently ${degrees} °C in ${weather.name}, ${weather.sys.country}`;
+    displayWeather(temperature, false);
   }
 }
 
@@ -170,6 +174,7 @@ function utilizeLocationBtns(
   savedLocationBtn.addEventListener("click", () => {
     getWeather(city, country, state);
   });
+
   removeSavedLocationBtn.addEventListener("click", (e) => {
     const removedLocationIdx = activeLocations.findIndex(
       ({ id }) => id === e.target.parentElement.id,
@@ -277,8 +282,7 @@ locationInputForm.addEventListener("submit", (e) => {
 
 toggleUnitBtn.addEventListener("click", () => {
   unitInF = !unitInF; // Flips to opposite unit
-  /* TODO: handle unit conversion here instead of displayWeather */
-  displayWeather(weatherData);
+  handleToggleUnit(weatherData);
 });
 
 saveBtn.addEventListener("click", () => {
